@@ -1,0 +1,1888 @@
+[
+  {
+    "eem_id": 1,
+    "stage": "drilling",
+    "equipment": "Gas turbine (GT) generator",
+    "measure": "Optimize GT loading and spinning reserve",
+    "measure_raw": "Optimize GT loading and spinning reserve [9]",
+    "source_refs": [
+      9
+    ],
+    "implementation_note": "Run fewer units at higher efficient load; verify reserve margin and black-start logic.",
+    "hazard_vector": {
+      "WC": 3,
+      "FE": 2,
+      "EH": 2,
+      "TE": 1,
+      "MF": 1,
+      "EI": 2
+    },
+    "hazard_list": [
+      3,
+      2,
+      2,
+      1,
+      1,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 2,
+    "stage": "drilling",
+    "equipment": "Diesel generator set",
+    "measure": "Load management and auto-start/stop sequencing",
+    "measure_raw": "Load management and auto-start/stop sequencing [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Avoid low-load wet stacking and unnecessary idling; maintain emergency power availability.",
+    "hazard_vector": {
+      "WC": 3,
+      "FE": 2,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      3,
+      2,
+      2,
+      1,
+      2,
+      2
+    ],
+    "cris": 12,
+    "normalized_interaction": 66.6667
+  },
+  {
+    "eem_id": 3,
+    "stage": "drilling",
+    "equipment": "Battery energy storage system (BESS)",
+    "measure": "Spinning reserve support and peak shaving",
+    "measure_raw": "Spinning reserve support and peak shaving [11]",
+    "source_refs": [
+      11
+    ],
+    "implementation_note": "Useful for GT optimization; requires battery fire protection, ventilation, and isolation.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      3,
+      2,
+      1,
+      2,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 4,
+    "stage": "drilling",
+    "equipment": "SCR/VFD drive house",
+    "measure": "Power electronics cooling and harmonic control",
+    "measure_raw": "Power electronics cooling and harmonic control [12]",
+    "source_refs": [
+      12
+    ],
+    "implementation_note": "Improve motor control while controlling heat load, harmonics, and maintenance access.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 3,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      2,
+      3,
+      1,
+      2,
+      1
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 5,
+    "stage": "drilling",
+    "equipment": "Power distribution switchgear",
+    "measure": "Transformer loading and reactive power correction",
+    "measure_raw": "Transformer loading and reactive power correction [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Power factor correction reduces losses; apply safe switching and lockout procedures.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 3,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      3,
+      1,
+      2,
+      1
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 6,
+    "stage": "drilling",
+    "equipment": "Transformers",
+    "measure": "Right-sizing and high-efficiency transformer replacement",
+    "measure_raw": "Right-sizing and high-efficiency transformer replacement [12]",
+    "source_refs": [
+      12
+    ],
+    "implementation_note": "Reduce no-load losses; monitor oil temperature and containment.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 2,
+      "TE": 1,
+      "MF": 1,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      2,
+      2,
+      1,
+      1,
+      1
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 7,
+    "stage": "drilling",
+    "equipment": "Mud pump",
+    "measure": "VFD control and pump efficiency tuning AI-based co-optimization of VFD settings, pump combinations, and load sharing at parallel pumping stations.",
+    "measure_raw": "VFD control and pump efficiency tuning [13] AI-based co-optimization of VFD settings, pump combinations, and load sharing at parallel pumping stations. [18]",
+    "source_refs": [
+      13,
+      18
+    ],
+    "implementation_note": "Match pump speed to flow requirement; inspect pulsation dampeners and relief valves. Real-time supervisory optimization further reduces power use",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 3,
+      "EI": 1
+    },
+    "hazard_list": [
+      2,
+      1,
+      2,
+      1,
+      3,
+      1
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 8,
+    "stage": "drilling",
+    "equipment": "Mud pump liner/piston",
+    "measure": "Leakage and worn-fluid-end maintenance",
+    "measure_raw": "Leakage and worn-fluid-end maintenance [14]",
+    "source_refs": [
+      14
+    ],
+    "implementation_note": "Prevent bypass losses and fluid leakage; maintenance improves both energy and safety.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 1,
+      "EH": 1,
+      "TE": 2,
+      "MF": 3,
+      "EI": 2
+    },
+    "hazard_list": [
+      2,
+      1,
+      1,
+      2,
+      3,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 9,
+    "stage": "drilling",
+    "equipment": "Mud agitator",
+    "measure": "Motor right-sizing and timer/control optimization",
+    "measure_raw": "Motor right-sizing and timer/control optimization [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Avoid continuous agitation where not needed; guard moving parts.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      2,
+      1
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 10,
+    "stage": "drilling",
+    "equipment": "Shale shaker",
+    "measure": "Efficient motors and screen condition control",
+    "measure_raw": "Efficient motors and screen condition control [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Maintain screen performance to reduce reprocessing and mud losses.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      2,
+      1
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 11,
+    "stage": "drilling",
+    "equipment": "Desander/ desilter hydrocyclone",
+    "measure": "Pressure drop optimization",
+    "measure_raw": "Pressure drop optimization [14]",
+    "source_refs": [
+      14
+    ],
+    "implementation_note": "Operate at target pressure; replace worn cones to lower pump load.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 1,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      1,
+      1,
+      2,
+      1
+    ],
+    "cris": 7,
+    "normalized_interaction": 38.8889
+  },
+  {
+    "eem_id": 12,
+    "stage": "drilling",
+    "equipment": "Drawworks motor",
+    "measure": "VFD regenerative braking and efficient motor",
+    "measure_raw": "VFD regenerative braking and efficient motor [12]",
+    "source_refs": [
+      12
+    ],
+    "implementation_note": "Energy recovery possible; safety interlocks and braking redundancy are critical.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 3,
+      "EI": 1
+    },
+    "hazard_list": [
+      2,
+      1,
+      2,
+      1,
+      3,
+      1
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 13,
+    "stage": "drilling",
+    "equipment": "Top drive",
+    "measure": "Torque/speed optimization and condition monitoring",
+    "measure_raw": "Torque/speed optimization and condition monitoring [9]",
+    "source_refs": [
+      9
+    ],
+    "implementation_note": "Reduce unnecessary torque demand while protecting motor and gearbox.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 3,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      3,
+      1
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 14,
+    "stage": "drilling",
+    "equipment": "Rotary table",
+    "measure": "Efficient motor and idle shutdown",
+    "measure_raw": "Efficient motor and idle shutdown [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Reduce idling during non-rotating periods; maintain guarding.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      2,
+      1
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 15,
+    "stage": "drilling",
+    "equipment": "Air compressor",
+    "measure": "Leak detection in pneumatic lines and air tools",
+    "measure_raw": "Leak detection in pneumatic lines and air tools [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Compressed-air leaks waste power; isolate before maintenance.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 1,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      1,
+      1,
+      2,
+      1
+    ],
+    "cris": 7,
+    "normalized_interaction": 38.8889
+  },
+  {
+    "eem_id": 16,
+    "stage": "drilling",
+    "equipment": "Compressed-air dryer",
+    "measure": "Dew point control and pressure setpoint reduction",
+    "measure_raw": "Dew point control and pressure setpoint reduction [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Lower discharge pressure and regenerate only as needed.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 1,
+      "TE": 1,
+      "MF": 1,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "cris": 6,
+    "normalized_interaction": 33.3333
+  },
+  {
+    "eem_id": 17,
+    "stage": "drilling",
+    "equipment": "HVAC unit",
+    "measure": "Setpoint control, economizer, filter maintenance",
+    "measure_raw": "Setpoint control, economizer, filter maintenance [12]",
+    "source_refs": [
+      12
+    ],
+    "implementation_note": "Reduce auxiliary load while maintaining worker comfort and control-room reliability.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 1,
+      "TE": 2,
+      "MF": 1,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      1,
+      2,
+      1,
+      1
+    ],
+    "cris": 7,
+    "normalized_interaction": 38.8889
+  },
+  {
+    "eem_id": 18,
+    "stage": "drilling",
+    "equipment": "Lighting system",
+    "measure": "LED conversion and occupancy/daylight controls",
+    "measure_raw": "LED conversion and occupancy/daylight controls [12]",
+    "source_refs": [
+      12
+    ],
+    "implementation_note": "Improve illumination with lower load; preserve emergency lighting levels.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 1,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      1,
+      1
+    ],
+    "cris": 7,
+    "normalized_interaction": 38.8889
+  },
+  {
+    "eem_id": 19,
+    "stage": "drilling",
+    "equipment": "Rig camp water heater",
+    "measure": "Insulation and temperature setpoint optimization",
+    "measure_raw": "Insulation and temperature setpoint optimization [15]",
+    "source_refs": [
+      15
+    ],
+    "implementation_note": "Reduce heat loss while maintaining sanitary water temperature.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 1,
+      "TE": 1,
+      "MF": 1,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "cris": 6,
+    "normalized_interaction": 33.3333
+  },
+  {
+    "eem_id": 20,
+    "stage": "drilling",
+    "equipment": "Mud mixing pump",
+    "measure": "Batch scheduling and VFD control",
+    "measure_raw": "Batch scheduling and VFD control [14]",
+    "source_refs": [
+      14
+    ],
+    "implementation_note": "Reduce recirculation and idle pumping; use chemical PPE.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 2,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      2,
+      2,
+      1
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 21,
+    "stage": "drilling",
+    "equipment": "Centrifuge",
+    "measure": "Bowl speed optimization",
+    "measure_raw": "Bowl speed optimization [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Control solids-removal energy and maintain vibration alarms.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 1,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      1,
+      1,
+      2,
+      1
+    ],
+    "cris": 7,
+    "normalized_interaction": 38.8889
+  },
+  {
+    "eem_id": 22,
+    "stage": "drilling",
+    "equipment": "BOP hydraulic power unit",
+    "measure": "Accumulator pressure maintenance and leak control",
+    "measure_raw": "Accumulator pressure maintenance and leak control [16]",
+    "source_refs": [
+      16
+    ],
+    "implementation_note": "Energy measure is secondary to safety; never compromise required accumulator capacity.",
+    "hazard_vector": {
+      "WC": 3,
+      "FE": 2,
+      "EH": 1,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      3,
+      2,
+      1,
+      1,
+      2,
+      1
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 23,
+    "stage": "drilling",
+    "equipment": "Choke manifold",
+    "measure": "Pressure drop and choke setting optimization",
+    "measure_raw": "Pressure drop and choke setting optimization [17]",
+    "source_refs": [
+      17
+    ],
+    "implementation_note": "Optimize choke settings only within well-control envelope.",
+    "hazard_vector": {
+      "WC": 3,
+      "FE": 2,
+      "EH": 0,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      3,
+      2,
+      0,
+      2,
+      2,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 24,
+    "stage": "drilling",
+    "equipment": "Crane / lifting equipment",
+    "measure": "Idle reduction and electric/hybrid drives where practical",
+    "measure_raw": "Idle reduction and electric/hybrid drives where practical [12]",
+    "source_refs": [
+      12
+    ],
+    "implementation_note": "Energy saving through idle policies; lift planning remains primary safety control.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      2,
+      2
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 25,
+    "stage": "drilling",
+    "equipment": "Forklift / telehandler",
+    "measure": "Battery-electric conversion or idle reduction",
+    "measure_raw": "Battery-electric conversion or idle reduction [12]",
+    "source_refs": [
+      12
+    ],
+    "implementation_note": "Lower fuel use and indoor exhaust; manage charging areas.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 2,
+      "TE": 2,
+      "MF": 1,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      2,
+      2,
+      2,
+      1,
+      2
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 26,
+    "stage": "well_fluid_extraction",
+    "equipment": "Electric submersible pump (ESP)",
+    "measure": "ML/ANN speed and choke optimization",
+    "measure_raw": "ML/ANN speed and choke optimization [19]",
+    "source_refs": [
+      19
+    ],
+    "implementation_note": "Optimize pump speed to avoid overheating and reduce interventions.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 1,
+      "EH": 3,
+      "TE": 1,
+      "MF": 3,
+      "EI": 1
+    },
+    "hazard_list": [
+      2,
+      1,
+      3,
+      1,
+      3,
+      1
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 27,
+    "stage": "well_fluid_extraction",
+    "equipment": "ESP motor",
+    "measure": "Permanent magnet motor upgrade",
+    "measure_raw": "Permanent magnet motor upgrade [20]",
+    "source_refs": [
+      20
+    ],
+    "implementation_note": "Lower cable losses and operating temperature; confirm compatibility.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 3,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      3,
+      1,
+      2,
+      1
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 28,
+    "stage": "well_fluid_extraction",
+    "equipment": "ESP pump stages",
+    "measure": "Mixed-flow or wide-efficiency-range hydraulic design",
+    "measure_raw": "Mixed-flow or wide-efficiency-range hydraulic design [21]",
+    "source_refs": [
+      21
+    ],
+    "implementation_note": "Improve pump efficiency across changing flow and gas fraction.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      2,
+      1
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 29,
+    "stage": "well_fluid_extraction",
+    "equipment": "ESP cable",
+    "measure": "Cable sizing and voltage drop reduction",
+    "measure_raw": "Cable sizing and voltage drop reduction [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Lower I²R losses and heat; inspect penetrators.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 3,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      2,
+      3,
+      1,
+      2,
+      1
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 30,
+    "stage": "well_fluid_extraction",
+    "equipment": "Rod pump / beam pump",
+    "measure": "Pump-off controller",
+    "measure_raw": "Pump-off controller [22]",
+    "source_refs": [
+      22
+    ],
+    "implementation_note": "Avoid dry pumping and wasted run time; reduce site visits.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      2,
+      1
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 31,
+    "stage": "well_fluid_extraction",
+    "equipment": "Beam pumping unit",
+    "measure": "IoT stroke-speed and counterbalance optimization",
+    "measure_raw": "IoT stroke-speed and counterbalance optimization [23]",
+    "source_refs": [
+      23
+    ],
+    "implementation_note": "Reduces imbalance losses and worker exposure for manual tuning.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 3,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      3,
+      1
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 32,
+    "stage": "well_fluid_extraction",
+    "equipment": "Sucker rod string",
+    "measure": "Friction and wear reduction through alignment",
+    "measure_raw": "Friction and wear reduction through alignment [14]",
+    "source_refs": [
+      14
+    ],
+    "implementation_note": "Reduced mechanical drag lowers motor load and failures.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 1,
+      "TE": 1,
+      "MF": 3,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      1,
+      1,
+      3,
+      1
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 33,
+    "stage": "well_fluid_extraction",
+    "equipment": "Progressing cavity pump",
+    "measure": "VFD torque and speed control",
+    "measure_raw": "VFD torque and speed control [24]",
+    "source_refs": [
+      24
+    ],
+    "implementation_note": "Avoid over-torque, improve heavy-oil lifting efficiency.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 3,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      3,
+      1
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 34,
+    "stage": "well_fluid_extraction",
+    "equipment": "Gas lift compressor",
+    "measure": "Injection pressure and rate optimization",
+    "measure_raw": "Injection pressure and rate optimization [24]",
+    "source_refs": [
+      24
+    ],
+    "implementation_note": "Avoid over-injection; integrate leak detection.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 2,
+      "EH": 2,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "cris": 12,
+    "normalized_interaction": 66.6667
+  },
+  {
+    "eem_id": 35,
+    "stage": "well_fluid_extraction",
+    "equipment": "Gas lift valves",
+    "measure": "Valve tuning and surveillance",
+    "measure_raw": "Valve tuning and surveillance [24]",
+    "source_refs": [
+      24
+    ],
+    "implementation_note": "Correct valve operation reduces compressor horsepower.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 2,
+      "EH": 1,
+      "TE": 1,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      2,
+      2,
+      1,
+      1,
+      2,
+      2
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 36,
+    "stage": "well_fluid_extraction",
+    "equipment": "Wellhead heater",
+    "measure": "Insulation and temperature control",
+    "measure_raw": "Insulation and temperature control [15]",
+    "source_refs": [
+      15
+    ],
+    "implementation_note": "Reduce heat duty while maintaining hydrate/wax control.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 1,
+      "TE": 1,
+      "MF": 1,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      2,
+      1,
+      1,
+      1,
+      1
+    ],
+    "cris": 7,
+    "normalized_interaction": 38.8889
+  },
+  {
+    "eem_id": 37,
+    "stage": "well_fluid_extraction",
+    "equipment": "Chemical injection pump",
+    "measure": "Dose optimization and solar/electric drive",
+    "measure_raw": "Dose optimization and solar/electric drive [24]",
+    "source_refs": [
+      24
+    ],
+    "implementation_note": "Avoid over-injection; verify corrosion/hydrate protection.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 2,
+      "EH": 2,
+      "TE": 2,
+      "MF": 1,
+      "EI": 2
+    },
+    "hazard_list": [
+      2,
+      2,
+      2,
+      2,
+      1,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 38,
+    "stage": "well_fluid_extraction",
+    "equipment": "Pneumatic controller",
+    "measure": "Replace high-bleed with low/no-bleed device",
+    "measure_raw": "Replace high-bleed with low/no-bleed device [25]",
+    "source_refs": [
+      25
+    ],
+    "implementation_note": "Cuts methane and improves air quality; maintain fail-safe action.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 1,
+      "TE": 3,
+      "MF": 1,
+      "EI": 3
+    },
+    "hazard_list": [
+      1,
+      3,
+      1,
+      3,
+      1,
+      3
+    ],
+    "cris": 12,
+    "normalized_interaction": 66.6667
+  },
+  {
+    "eem_id": 39,
+    "stage": "well_fluid_extraction",
+    "equipment": "Pneumatic pump",
+    "measure": "Instrument-air or electric replacement",
+    "measure_raw": "Instrument-air or electric replacement [25]",
+    "source_refs": [
+      25
+    ],
+    "implementation_note": "Reduces gas consumption and emissions.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 2,
+      "TE": 3,
+      "MF": 1,
+      "EI": 3
+    },
+    "hazard_list": [
+      1,
+      3,
+      2,
+      3,
+      1,
+      3
+    ],
+    "cris": 13,
+    "normalized_interaction": 72.2222
+  },
+  {
+    "eem_id": 40,
+    "stage": "well_fluid_extraction",
+    "equipment": "Leak points: valves/flanges",
+    "measure": "LDAR and repair of gas/oil leaks",
+    "measure_raw": "LDAR and repair of gas/oil leaks [25]",
+    "source_refs": [
+      25
+    ],
+    "implementation_note": "Energy/product conservation plus major HSE benefit.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 3,
+      "EH": 1,
+      "TE": 3,
+      "MF": 1,
+      "EI": 3
+    },
+    "hazard_list": [
+      2,
+      3,
+      1,
+      3,
+      1,
+      3
+    ],
+    "cris": 13,
+    "normalized_interaction": 72.2222
+  },
+  {
+    "eem_id": 41,
+    "stage": "well_fluid_extraction",
+    "equipment": "Flowline",
+    "measure": "Leakage, pressure drop and insulation management",
+    "measure_raw": "Leakage, pressure drop and insulation management [24]",
+    "source_refs": [
+      24
+    ],
+    "implementation_note": "Lower pumping/compression energy and loss of containment risk.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 2,
+      "EH": 1,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      2,
+      2,
+      1,
+      2,
+      2,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 42,
+    "stage": "well_fluid_extraction",
+    "equipment": "Multiphase pump",
+    "measure": "VFD and operating envelope control",
+    "measure_raw": "VFD and operating envelope control [14]",
+    "source_refs": [
+      14
+    ],
+    "implementation_note": "Reduce bypassing and maintain stable flow.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      1,
+      2,
+      1
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 43,
+    "stage": "well_fluid_extraction",
+    "equipment": "Pipeline pigging system",
+    "measure": "Pigging schedule optimization",
+    "measure_raw": "Pigging schedule optimization [24]",
+    "source_refs": [
+      24
+    ],
+    "implementation_note": "Controls wax/scale pressure drop; strict isolation needed.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 1,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      2,
+      1,
+      2,
+      2,
+      2
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 44,
+    "stage": "well_fluid_extraction",
+    "equipment": "Produced-water transfer pump",
+    "measure": "VFD and pump selection",
+    "measure_raw": "VFD and pump selection [24]",
+    "source_refs": [
+      24
+    ],
+    "implementation_note": "Large energy consumer; match duty to water cut.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      2,
+      2,
+      2
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 45,
+    "stage": "well_fluid_extraction",
+    "equipment": "Water injection pump",
+    "measure": "Pump efficiency and pressure setpoint optimization",
+    "measure_raw": "Pump efficiency and pressure setpoint optimization [24]",
+    "source_refs": [
+      24
+    ],
+    "implementation_note": "Reduce horsepower while meeting reservoir needs.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      2,
+      1,
+      2,
+      1,
+      2,
+      2
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 46,
+    "stage": "well_fluid_extraction",
+    "equipment": "Disposal well pump",
+    "measure": "Friction reduction and injection pressure control",
+    "measure_raw": "Friction reduction and injection pressure control [26]",
+    "source_refs": [
+      26
+    ],
+    "implementation_note": "Energy saving must respect permit limits and integrity.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 1,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 3
+    },
+    "hazard_list": [
+      2,
+      1,
+      2,
+      1,
+      2,
+      3
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 47,
+    "stage": "well_fluid_extraction",
+    "equipment": "Hydrocyclone",
+    "measure": "Pressure ratio optimization",
+    "measure_raw": "Pressure ratio optimization [26]",
+    "source_refs": [
+      26
+    ],
+    "implementation_note": "Avoid excessive pressure drop and maintain separation.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 1,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      1,
+      1,
+      2,
+      2,
+      2
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 48,
+    "stage": "well_fluid_extraction",
+    "equipment": "Membrane treatment unit",
+    "measure": "Low-energy membrane/hybrid treatment selection",
+    "measure_raw": "Low-energy membrane/hybrid treatment selection [27]",
+    "source_refs": [
+      27
+    ],
+    "implementation_note": "Can lower energy versus thermal routes when salinity/fouling fit.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 1,
+      "EH": 2,
+      "TE": 2,
+      "MF": 1,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      1,
+      2,
+      2,
+      1,
+      2
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 49,
+    "stage": "well_fluid_extraction",
+    "equipment": "Electrocoagulation unit",
+    "measure": "Power control and electrode maintenance",
+    "measure_raw": "Power control and electrode maintenance [26]",
+    "source_refs": [
+      26
+    ],
+    "implementation_note": "Useful for treatment; manage hydrogen evolution and sludge.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 3,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      2,
+      3,
+      2,
+      2,
+      2
+    ],
+    "cris": 12,
+    "normalized_interaction": 66.6667
+  },
+  {
+    "eem_id": 50,
+    "stage": "surface_treatment",
+    "equipment": "Three-phase separator",
+    "measure": "Pressure/level control and residence-time optimization",
+    "measure_raw": "Pressure/level control and residence-time optimization [28]",
+    "source_refs": [
+      28
+    ],
+    "implementation_note": "Stable separation lowers reprocessing and compression/heating demand.",
+    "hazard_vector": {
+      "WC": 2,
+      "FE": 3,
+      "EH": 1,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      2,
+      3,
+      1,
+      2,
+      2,
+      2
+    ],
+    "cris": 12,
+    "normalized_interaction": 66.6667
+  },
+  {
+    "eem_id": 51,
+    "stage": "surface_treatment",
+    "equipment": "Heater treater",
+    "measure": "Burner tuning, insulation and temperature reduction",
+    "measure_raw": "Burner tuning, insulation and temperature reduction [15]",
+    "source_refs": [
+      15
+    ],
+    "implementation_note": "Major thermal load; avoid overheating crude.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 1,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      3,
+      1,
+      2,
+      2,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 52,
+    "stage": "surface_treatment",
+    "equipment": "Crude stabilizer",
+    "measure": "Lower temperature/ pressure operation where feasible",
+    "measure_raw": "Lower temperature/ pressure operation where feasible [29]",
+    "source_refs": [
+      29
+    ],
+    "implementation_note": "Optimize vapor pressure specs with lower heat duty.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 1,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      3,
+      1,
+      2,
+      2,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 53,
+    "stage": "surface_treatment",
+    "equipment": "Gas compressor",
+    "measure": "Load matching and anti-surge optimization",
+    "measure_raw": "Load matching and anti-surge optimization [30]",
+    "source_refs": [
+      30
+    ],
+    "implementation_note": "Reduces specific compression energy and mechanical stress.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 2,
+      "TE": 2,
+      "MF": 3,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      3,
+      2,
+      2,
+      3,
+      2
+    ],
+    "cris": 13,
+    "normalized_interaction": 72.2222
+  },
+  {
+    "eem_id": 54,
+    "stage": "surface_treatment",
+    "equipment": "Reciprocating compressor",
+    "measure": "Rod packing maintenance and leak reduction",
+    "measure_raw": "Rod packing maintenance and leak reduction [25]",
+    "source_refs": [
+      25
+    ],
+    "implementation_note": "Replace worn packing to reduce product loss and emissions.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 1,
+      "TE": 3,
+      "MF": 3,
+      "EI": 3
+    },
+    "hazard_list": [
+      1,
+      3,
+      1,
+      3,
+      3,
+      3
+    ],
+    "cris": 14,
+    "normalized_interaction": 77.7778
+  },
+  {
+    "eem_id": 55,
+    "stage": "surface_treatment",
+    "equipment": "Compressor cooler",
+    "measure": "Clean fin-fan/heat exchanger surfaces",
+    "measure_raw": "Clean fin-fan/heat exchanger surfaces [10]",
+    "source_refs": [
+      10
+    ],
+    "implementation_note": "Lower discharge temperature and compressor power.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 1,
+      "TE": 1,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      2,
+      1,
+      1,
+      2,
+      1
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 56,
+    "stage": "surface_treatment",
+    "equipment": "Dehydrator reboiler",
+    "measure": "Reboiler temperature and circulation optimization",
+    "measure_raw": "Reboiler temperature and circulation optimization [25]",
+    "source_refs": [
+      25
+    ],
+    "implementation_note": "Reduce gas use and emissions while meeting water dewpoint.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 1,
+      "TE": 2,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      3,
+      1,
+      2,
+      2,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 57,
+    "stage": "surface_treatment",
+    "equipment": "Amine sweetening unit",
+    "measure": "Lean circulation and reboiler duty optimization",
+    "measure_raw": "Lean circulation and reboiler duty optimization [31]",
+    "source_refs": [
+      31
+    ],
+    "implementation_note": "Reduce thermal load without sacrificing H2S removal.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 1,
+      "TE": 3,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      2,
+      1,
+      3,
+      2,
+      2
+    ],
+    "cris": 11,
+    "normalized_interaction": 61.1111
+  },
+  {
+    "eem_id": 58,
+    "stage": "surface_treatment",
+    "equipment": "Flare system",
+    "measure": "Flare gas recovery and purge optimization",
+    "measure_raw": "Flare gas recovery and purge optimization [31]",
+    "source_refs": [
+      31
+    ],
+    "implementation_note": "Recover fuel gas; maintain safe purge and pilots.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 1,
+      "TE": 3,
+      "MF": 2,
+      "EI": 3
+    },
+    "hazard_list": [
+      1,
+      3,
+      1,
+      3,
+      2,
+      3
+    ],
+    "cris": 13,
+    "normalized_interaction": 72.2222
+  },
+  {
+    "eem_id": 59,
+    "stage": "surface_treatment",
+    "equipment": "Vapor recovery unit (VRU)",
+    "measure": "Install VRU on tanks and separators",
+    "measure_raw": "Install VRU on tanks and separators [25]",
+    "source_refs": [
+      25
+    ],
+    "implementation_note": "Saves gas and reduces VOC exposure; manage oxygen and controls.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 2,
+      "TE": 3,
+      "MF": 2,
+      "EI": 3
+    },
+    "hazard_list": [
+      1,
+      3,
+      2,
+      3,
+      2,
+      3
+    ],
+    "cris": 14,
+    "normalized_interaction": 77.7778
+  },
+  {
+    "eem_id": 60,
+    "stage": "surface_treatment",
+    "equipment": "Storage tank",
+    "measure": "Floating roof/seal maintenance and vapor balancing",
+    "measure_raw": "Floating roof/seal maintenance and vapor balancing [25]",
+    "source_refs": [
+      25
+    ],
+    "implementation_note": "Reduces evaporative losses and emissions.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 3,
+      "EH": 1,
+      "TE": 3,
+      "MF": 2,
+      "EI": 3
+    },
+    "hazard_list": [
+      1,
+      3,
+      1,
+      3,
+      2,
+      3
+    ],
+    "cris": 13,
+    "normalized_interaction": 72.2222
+  },
+  {
+    "eem_id": 61,
+    "stage": "surface_treatment",
+    "equipment": "Tank heater",
+    "measure": "Insulation and thermostat control",
+    "measure_raw": "Insulation and thermostat control [15]",
+    "source_refs": [
+      15
+    ],
+    "implementation_note": "Maintain viscosity/flow with minimal heat input.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 1,
+      "TE": 1,
+      "MF": 1,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      2,
+      1,
+      1,
+      1,
+      2
+    ],
+    "cris": 8,
+    "normalized_interaction": 44.4444
+  },
+  {
+    "eem_id": 62,
+    "stage": "surface_treatment",
+    "equipment": "Heat exchanger",
+    "measure": "Fouling monitoring and cleaning",
+    "measure_raw": "Fouling monitoring and cleaning [32]",
+    "source_refs": [
+      32
+    ],
+    "implementation_note": "Reduces fired-heater duty; manage corrosion/fouling.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 1,
+      "TE": 2,
+      "MF": 2,
+      "EI": 1
+    },
+    "hazard_list": [
+      1,
+      2,
+      1,
+      2,
+      2,
+      1
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  },
+  {
+    "eem_id": 63,
+    "stage": "surface_treatment",
+    "equipment": "Waste heat recovery unit",
+    "measure": "ORC/Rankine/heat integration from turbines/compressors",
+    "measure_raw": "ORC/Rankine/heat integration from turbines/compressors [33]",
+    "source_refs": [
+      33
+    ],
+    "implementation_note": "Recover exhaust heat to reduce fuel for process heating.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 2,
+      "TE": 1,
+      "MF": 2,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      2,
+      2,
+      1,
+      2,
+      2
+    ],
+    "cris": 10,
+    "normalized_interaction": 55.5556
+  },
+  {
+    "eem_id": 64,
+    "stage": "surface_treatment",
+    "equipment": "Instrument air compressor",
+    "measure": "Convert pneumatic devices to instrument air",
+    "measure_raw": "Convert pneumatic devices to instrument air [25]",
+    "source_refs": [
+      25
+    ],
+    "implementation_note": "Avoid methane venting; maintain dry, reliable instrument air.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 2,
+      "TE": 3,
+      "MF": 1,
+      "EI": 3
+    },
+    "hazard_list": [
+      1,
+      2,
+      2,
+      3,
+      1,
+      3
+    ],
+    "cris": 12,
+    "normalized_interaction": 66.6667
+  },
+  {
+    "eem_id": 65,
+    "stage": "surface_treatment",
+    "equipment": "Solar PV for well pad",
+    "measure": "Hybrid supply for low-load equipment",
+    "measure_raw": "Hybrid supply for low-load equipment [24]",
+    "source_refs": [
+      24
+    ],
+    "implementation_note": "Reduces diesel generator run hours; add battery protection.",
+    "hazard_vector": {
+      "WC": 1,
+      "FE": 2,
+      "EH": 2,
+      "TE": 1,
+      "MF": 1,
+      "EI": 2
+    },
+    "hazard_list": [
+      1,
+      2,
+      2,
+      1,
+      1,
+      2
+    ],
+    "cris": 9,
+    "normalized_interaction": 50.0
+  }
+]

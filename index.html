@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Risk-Informed Energy Assessment</title>
+<style>
+  :root { --ink:#12202c; --soft:#5a6f7d; --line:#dbe4ea; --bg:#f5f8fa; --brand:#15506b;
+          --red:#b3261e; --amber:#9a6212; --green:#1d6f42;
+          --mono: ui-monospace, Consolas, monospace; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:14px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+  header { background:var(--brand); color:#fff; padding:14px 24px; }
+  header h1 { margin:0; font-size:16px; }
+  header p { margin:2px 0 0; font-size:12px; opacity:.85; }
+  .notice { background:#fdf3e2; border-bottom:1px solid #e8d5ac; color:var(--amber);
+            font-size:12px; padding:7px 24px; }
+  main { max-width:980px; margin:0 auto; padding:20px 24px 60px; }
+  section { background:#fff; border:1px solid var(--line); border-radius:8px; margin-bottom:16px; }
+  section > h2 { margin:0; padding:12px 16px; font-size:15px; border-bottom:1px solid #eef3f6; }
+  section > h2 small { font-weight:400; color:var(--soft); font-size:12px; margin-left:8px; }
+  .body { padding:16px; }
+  .grid3 { display:grid; gap:14px; grid-template-columns:1fr 1fr 1fr; }
+  .grid2 { display:grid; gap:14px; grid-template-columns:1fr 1fr; }
+  @media (max-width:820px) { .grid3,.grid2 { grid-template-columns:1fr; } }
+  label.f { display:block; font-size:12px; font-weight:600; color:var(--soft); margin-bottom:4px; }
+  input[type=text], input[type=number], select { width:100%; padding:7px 9px;
+      border:1px solid var(--line); border-radius:5px; font:inherit; background:#fff; }
+  .row { margin-bottom:12px; }
+  fieldset { border:1px solid var(--line); border-radius:6px; margin:0 0 12px; padding:0; }
+  legend { font-size:13px; font-weight:600; padding:0 8px; margin-left:8px; }
+
+  .ev { display:grid; grid-template-columns:20px 1fr 78px 96px auto; gap:8px; align-items:center;
+        padding:5px 12px; border-top:1px solid #eef3f6; font-size:13px; }
+  .ev.head { border-top:none; background:#fafcfd; font-size:11px; font-weight:700;
+             color:var(--soft); text-transform:uppercase; letter-spacing:.05em; padding:6px 12px; }
+  .ev .del { cursor:pointer; color:#c3ced5; font-size:17px; text-align:center; user-select:none; }
+  .ev .del:hover { color:var(--red); }
+  .ev input.nm { border:1px solid transparent; background:transparent; padding:4px 6px; }
+  .ev input.nm:hover { border-color:var(--line); }
+  .ev input.nm:focus { border-color:var(--brand); background:#fff; outline:none; }
+  .ev.req input.nm { font-weight:600; }
+  .reqbox { display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--soft); }
+  .reqbox input { width:14px; height:14px; accent-color:var(--red); margin:0; flex:none; }
+  select.tau { padding:3px 5px; font-size:12px; }
+  select.tau.off { visibility:hidden; }
+  .seg { display:flex; border:1px solid var(--line); border-radius:5px; overflow:hidden; }
+  .seg label { padding:3px 9px; font-size:12px; cursor:pointer; color:var(--soft);
+               border-right:1px solid var(--line); background:#fff; }
+  .seg label:last-child { border-right:none; }
+  .seg input { position:absolute; opacity:0; width:0; height:0; }
+  .seg label:has(input:checked) { background:var(--brand); color:#fff; font-weight:600; }
+  .addrow { padding:7px 12px; border-top:1px solid #eef3f6; }
+  .link { background:none; border:none; color:var(--brand); font-size:12px; font-weight:600;
+          cursor:pointer; padding:2px 0; }
+  .link.setall { border:1px solid var(--line); border-radius:4px; padding:1px 7px;
+                 margin-left:3px; }
+  .link.setall:hover { background:var(--brand); color:#fff; border-color:var(--brand); }
+
+  .check { display:flex; gap:9px; align-items:flex-start; padding:7px 0; font-size:13px;
+           border-bottom:1px solid #eef3f6; }
+  .check:last-child { border-bottom:none; }
+  .check input { margin-top:3px; width:15px; height:15px; accent-color:var(--brand); flex:none; }
+  .check .hint { display:block; color:var(--soft); font-size:12px; }
+  button.go { font:inherit; font-weight:600; padding:10px 20px; border-radius:6px;
+           border:1px solid var(--brand); background:var(--brand); color:#fff; cursor:pointer; }
+  button.sec { background:#fff; color:var(--brand); }
+  .banner { padding:16px 20px; border-radius:8px; border-left:5px solid; margin-bottom:14px; }
+  .banner .m { font-size:22px; font-weight:700; margin:2px 0 6px; }
+  .banner .l { font-size:11px; text-transform:uppercase; letter-spacing:.07em; opacity:.75; }
+  .onsite { background:#fdecea; border-color:var(--red); color:#7d1a15; }
+  .remote { background:#fdf3e2; border-color:var(--amber); color:#6e460d; }
+  .self   { background:#e8f5ed; border-color:var(--green); color:#15522f; }
+  .hold   { background:#eceff1; border-color:#607d8b; color:#37474f; }
+  .stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .stat { flex:1 1 130px; border:1px solid var(--line); border-radius:6px; padding:10px 12px;
+          background:#fff; }
+  .stat .k { font-size:11px; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; }
+  .stat .v { font-size:19px; font-weight:700; font-family:var(--mono); }
+  .bars { display:grid; grid-template-columns:200px 1fr 64px; gap:10px; align-items:center;
+          padding:3px 0; font-size:13px; }
+  .bars .bar { height:15px; background:#eef3f6; border-radius:3px; overflow:hidden; }
+  .bars .bar i { display:block; height:100%; }
+  .bars .lv { font-size:11px; font-weight:700; text-align:right; font-family:var(--mono); }
+  .l3{background:var(--red)} .l2{background:#d98324} .l1{background:#6ea8bd}
+  .l0{background:#c6d2d9} .lS{background:#6ea8bd}
+  pre { background:#0f2130; color:#cfe3ef; padding:13px; border-radius:6px; overflow:auto;
+        max-height:320px; font-family:var(--mono); font-size:11.5px; margin:0; }
+  .muted { color:var(--soft); font-size:12px; }
+  .err { background:#fdecea; border:1px solid #f2c2be; color:var(--red); padding:10px 14px;
+         border-radius:6px; margin-bottom:12px; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Risk-Informed, Readiness-Aware Energy Assessment</h1>
+  <p>Upstream oil &amp; gas &middot; front end for the reference implementation of Algorithm 1</p>
+</header>
+<div class="notice">
+  Screening and assessment-planning support only. Not a substitute for PHA, HAZOP, quantitative
+  risk assessment, management of change, or operator engineering approval.
+</div>
+
+<main>
+  <div id="error" class="err hidden"></div>
+
+  <section>
+    <h2>1 &nbsp; Assessment scope</h2>
+    <div class="body"><div class="grid3">
+      <div><label class="f">Facility</label><input type="text" id="facility"></div>
+      <div><label class="f">Assessor</label><input type="text" id="assessor"></div>
+      <div><label class="f">Measure (loads its Appendix B ratings below)</label>
+        <select id="eem"></select></div>
+    </div>
+    <p class="muted" id="eemnote" style="margin:10px 0 0"></p></div>
+  </section>
+
+  <section>
+    <h2>2 &nbsp; Readiness evidence<small>Appendix C checklist &middot; Equations (4) and (7)</small></h2>
+    <div class="body">
+      <p class="muted" style="margin-top:0">
+        Items are coded <b>0</b> absent, <b>1</b> partial or outdated, <b>2</b> current and
+        demonstrated, <b>N/A</b> removed from the denominator. The list below is the evidence
+        named in Appendix C Table C1; Section 4.5 requires the assessment team to define the
+        item set and the mandatory subset <b>C</b> for their own scope, so every row can be
+        renamed, deleted, or added to, and any row can be marked required.
+        <b>The paper does not prescribe the acceptance thresholds &tau;</b> &mdash; the four
+        rows pre-marked required are the examples given in Section 4.5, and &tau; is yours to set.
+      </p>
+      <div id="checklists"></div>
+      <div class="row" style="margin-top:12px">
+        <label class="f">Readiness weight set W</label>
+        <select id="wmode">
+          <option value="bounded" selected>Bounded 0.10 &le; w &le; 0.35 &mdash; returns an interval</option>
+          <option value="equal">Equal weights &mdash; returns a single value</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 &nbsp; Hazard-interaction ratings<small>the six domains of Equation (1)</small></h2>
+    <div class="body">
+      <p class="muted" style="margin-top:0">Pre-filled from the selected measure's Appendix B
+      coding. Change any of them and CRIS is recalculated by the framework. Note that the
+      framework accepts only 0&ndash;3, so a domain that has <i>not yet been assessed</i> cannot
+      be distinguished from one rated 0.</p>
+      <div class="grid3" id="hazards"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 &nbsp; Criticality inputs<small>Equation (9)</small></h2>
+    <div class="body">
+      <div class="grid3">
+        <div><label class="f">Data sufficiency D (0&ndash;100)</label>
+          <input type="number" id="D" min="0" max="100" value="50">
+          <span class="muted">Enters as the deficit 100&minus;D.</span></div>
+        <div><label class="f">Action complexity C (0&ndash;100)</label>
+          <input type="number" id="C" min="0" max="100" value="50"></div>
+        <div><label class="f">Direct-verification need V (0&ndash;100)</label>
+          <input type="number" id="V" min="0" max="100" value="50"></div>
+      </div>
+      <p class="muted" style="margin:2px 0 12px">D, C and V are expert judgements entered by the
+      assessment team. The paper defines their meaning and range but sets no scoring rubric.</p>
+      <div class="grid2">
+        <div><label class="f">Opportunity scores (comma separated, optional)</label>
+          <input type="text" id="opp" placeholder="e.g. 80, 75, 70"></div>
+        <div><label class="f">Criticality weight set Q</label>
+          <select id="qmode">
+            <option value="equal" selected>Equal weights</option>
+            <option value="bounded">Bounded 0.15 &le; q &le; 0.40</option>
+          </select></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>5 &nbsp; Evidence and verification conditions<small>Table 4</small></h2>
+    <div class="body">
+      <div id="flags"></div>
+      <div class="row" style="margin-top:12px">
+        <label class="f">Reviewer rationale (recorded verbatim)</label>
+        <input type="text" id="rationale">
+      </div>
+      <button class="go" id="run">Run assessment</button>
+      <button class="go sec" id="clear">Reset form</button>
+      <span class="muted" id="status" style="margin-left:10px"></span>
+    </div>
+  </section>
+
+  <div id="results"></div>
+</main>
+
+<script>
+/* This script collects form values and displays what the server returns.
+   It performs no part of the assessment calculation. */
+
+/* Evidence items transcribed from Appendix C, Table C1 ("evidence to verify").
+   [name, mandatory-by-default] — the four defaults are the examples in Section 4.5. */
+const APPENDIX_C = [
+  ["data_availability", "S\u2081 Data availability",
+   "Can the assessor obtain reliable operating and energy data?", [
+    ["Minimum process and energy data for the intended calculation", true],
+    ["Meter list", false], ["Electricity and fuel bills", false],
+    ["Historian tags", false], ["Flow, pressure and temperature trends", false],
+    ["Run hours", false], ["Production records", false],
+    ["Calibration certificates", false], ["Missing-data logs", false],
+    ["Demonstration of data extraction", false]]],
+  ["workforce_capability", "S\u2082 Workforce capability",
+   "Can the site's people collect, understand and use the required information?", [
+    ["Required engineering competence for this scope", true],
+    ["Interviews with operations, maintenance and engineering staff", false],
+    ["Training records", false], ["Competency matrices", false],
+    ["Examples of previous energy or reliability studies", false],
+    ["Ability to explain operating envelopes and abnormal conditions", false]]],
+  ["management_commitment", "S\u2083 Management commitment",
+   "Is there visible authority and ownership to support the assessment?", [
+    ["Safe access authorization", true],
+    ["Named sponsor", false], ["Approved assessment scope", false],
+    ["Meeting minutes", false], ["Energy or operating objectives", false],
+    ["Budget route", false], ["Management review records", false],
+    ["Evidence that previous recommendations were considered and closed", false]]],
+  ["baseline_status", "S\u2084 Baseline status",
+   "Is there a credible reference against which improvement can be measured?", [
+    ["Definable assessment boundary", true],
+    ["Historical energy and production data", false],
+    ["Normalized KPIs", false], ["Operating-mode records", false],
+    ["Weather or throughput normalization where relevant", false],
+    ["Documented baseline period", false], ["Explanation of major changes", false]]],
+  ["implementation_readiness", "S\u2085 Implementation readiness",
+   "Can an accepted recommendation actually be executed and verified?", [
+    ["Named action owner", false], ["Maintenance or work-order route", false],
+    ["Procurement path", false], ["Budget mechanism", false],
+    ["Shutdown or turnaround window", false], ["MOC or permit requirements", false],
+    ["Contractor availability", false], ["Schedule", false],
+    ["Measurement and verification plan", false]]]];
+
+const DOMAINS = [
+  ["well_control", "Well control"], ["fire_explosion", "Fire / explosion"],
+  ["electrical_hazard", "Electrical hazard"], ["toxic_exposure", "Toxic exposure"],
+  ["mechanical_failure", "Mechanical failure"], ["environmental_impact", "Environmental impact"]];
+
+const FLAGS = [
+  ["direct_verification_required", "Direct field observation or measurement is required",
+   "Non-compensatory: this alone selects on-site expert assessment."],
+  ["safety_override", "A safety override has been declared for this measure",
+   "Non-compensatory: this alone selects on-site expert assessment."],
+  ["digital_evidence_validated", "The available digital evidence is validated", ""],
+  ["specialist_interpretation_required", "Specialist interpretation is required", ""],
+  ["internal_capability_adequate", "Internal engineering capability is adequate", ""],
+  ["protocol_requirements_satisfied", "Internal protocol requirements are satisfied", ""],
+  ["unresolved_evidence_requires_field", "Any unresolved evidence gap would need field work",
+   "Used only for escalation when the self-assessment conditions are not met."]];
+
+const LEVELS = ["None", "Low", "Medium", "High"];
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g,
+  c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+let EEMS = [];
+
+/* ---------- mutable checklist state ---------- */
+
+const state = {};
+APPENDIX_C.forEach(([key, , , items]) => {
+  state[key] = items.map(([name, mandatory]) =>
+    ({ name, mandatory, threshold: 2, score: 0 }));
+});
+
+function renderChecklists() {
+  $("checklists").innerHTML = APPENDIX_C.map(([key, title, question]) => {
+    const rows = state[key].map((item, i) => `
+      <div class="ev ${item.mandatory ? "req" : ""}">
+        <span class="del" data-act="del" data-dim="${key}" data-i="${i}"
+              title="Remove this item">&times;</span>
+        <input class="nm" type="text" value="${esc(item.name)}"
+               data-act="name" data-dim="${key}" data-i="${i}">
+        <label class="reqbox"><input type="checkbox" ${item.mandatory ? "checked" : ""}
+               data-act="mand" data-dim="${key}" data-i="${i}">required</label>
+        <select class="tau ${item.mandatory ? "" : "off"}"
+                data-act="tau" data-dim="${key}" data-i="${i}">
+          <option value="1" ${item.threshold === 1 ? "selected" : ""}>&tau; &ge; 1</option>
+          <option value="2" ${item.threshold === 2 ? "selected" : ""}>&tau; &ge; 2</option>
+        </select>
+        <div class="seg">
+          ${[0, 1, 2].map(v => `<label><input type="radio" name="${key}_${i}" value="${v}"
+             data-act="score" data-dim="${key}" data-i="${i}"
+             ${item.score === v ? "checked" : ""}>${v}</label>`).join("")}
+          <label><input type="radio" name="${key}_${i}" value="na"
+             data-act="score" data-dim="${key}" data-i="${i}"
+             ${item.score === null ? "checked" : ""}>N/A</label>
+        </div>
+      </div>`).join("");
+
+    const applicable = state[key].filter(x => x.score !== null).length;
+    return `<fieldset><legend>${title}</legend>
+      <div class="ev head"><span></span><span>${esc(question)}</span>
+        <span>gate</span><span>threshold</span><span>rating</span></div>
+      ${rows}
+      <div class="addrow">
+        <button class="link" data-act="add" data-dim="${key}">+ add evidence item</button>
+        <span class="muted" style="margin-left:14px">score every row:</span>
+        ${["0", "1", "2", "N/A"].map(v =>
+          `<button class="link setall" data-act="all" data-dim="${key}"
+                   data-v="${v}">${v}</button>`).join("")}
+        <span class="muted" style="margin-left:14px">${applicable} applicable item${
+          applicable === 1 ? "" : "s"} &rarr; denominator 2 &times; ${applicable}
+          = ${2 * applicable}</span>
+      </div></fieldset>`;
+  }).join("");
+}
+
+$("checklists").addEventListener("input", event => {
+  const t = event.target, act = t.dataset.act;
+  if (!act) return;
+  const item = state[t.dataset.dim][Number(t.dataset.i)];
+  if (act === "name") { item.name = t.value; return; }          // no re-render: keeps focus
+  if (act === "score") { item.score = t.value === "na" ? null : Number(t.value); }
+  if (act === "mand") { item.mandatory = t.checked; }
+  if (act === "tau") { item.threshold = Number(t.value); return; }
+  renderChecklists();
+});
+
+$("checklists").addEventListener("click", event => {
+  const t = event.target, act = t.dataset.act;
+  if (act === "add") {
+    state[t.dataset.dim].push({ name: "", mandatory: false, threshold: 2, score: 0 });
+  } else if (act === "del") {
+    state[t.dataset.dim].splice(Number(t.dataset.i), 1);
+  } else if (act === "all") {
+    const value = t.dataset.v === "N/A" ? null : Number(t.dataset.v);
+    state[t.dataset.dim].forEach(item => { item.score = value; });
+  } else { return; }
+  renderChecklists();
+});
+
+renderChecklists();
+
+/* ---------- the rest of the form ---------- */
+
+$("hazards").innerHTML = DOMAINS.map(([key, label]) => `
+  <div><label class="f">${label}</label>
+    <select id="h_${key}">
+      ${LEVELS.map((name, code) =>
+        `<option value="${code}">${code} &mdash; ${name}</option>`).join("")}
+    </select></div>`).join("");
+
+$("flags").innerHTML = FLAGS.map(([key, question, hint]) => `
+  <div class="check"><input type="checkbox" id="f_${key}">
+    <div>${esc(question)}${hint ? `<span class="hint">${esc(hint)}</span>` : ""}</div></div>`).join("");
+
+function loadEemRatings() {
+  const measure = EEMS.find(e => e.eem_id === Number($("eem").value));
+  if (!measure) return;
+  DOMAINS.forEach(([key], i) => { $("h_" + key).value = measure.hazard_list[i]; });
+  $("eemnote").innerHTML =
+    `${esc(measure.equipment)} &middot; ${esc(measure.stage)}<br>${esc(measure.note)}`;
+}
+
+fetch("/api/eems").then(r => r.json()).then(list => {
+  EEMS = list;
+  $("eem").innerHTML = list.map(m =>
+    `<option value="${m.eem_id}">${esc(m.label)}</option>`).join("");
+  loadEemRatings();
+});
+$("eem").onchange = loadEemRatings;
+
+/* ---------- submit ---------- */
+
+async function run() {
+  $("error").classList.add("hidden");
+  $("status").textContent = "Running Algorithm 1\u2026";
+
+  const readiness = {};
+  for (const key of Object.keys(state)) {
+    readiness[key] = state[key].map(item => ({
+      name: item.name.trim() || "(unnamed evidence item)",
+      score: item.score, mandatory: item.mandatory, threshold: item.threshold }));
+  }
+
+  const flags = {};
+  FLAGS.forEach(([key]) => { flags[key] = $("f_" + key).checked; });
+
+  const oppRaw = $("opp").value.trim();
+  let opportunity = null;
+  if (oppRaw) {
+    opportunity = oppRaw.split(",").map(v => Number(v.trim()));
+    if (opportunity.some(Number.isNaN)) {
+      fail("Opportunity scores must be numbers separated by commas."); return;
+    }
+  }
+
+  const selected = EEMS.find(e => e.eem_id === Number($("eem").value));
+  const payload = {
+    facility: $("facility").value, assessor: $("assessor").value,
+    eem_label: selected ? selected.label : "",
+    readiness,
+    hazard_vector: DOMAINS.map(([key]) => Number($("h_" + key).value)),
+    data_sufficiency_D: Number($("D").value),
+    action_complexity_C: Number($("C").value),
+    verification_need_V: Number($("V").value),
+    opportunity_scores: opportunity,
+    readiness_weight_mode: $("wmode").value,
+    criticality_weight_mode: $("qmode").value,
+    flags, rationale: $("rationale").value };
+
+  const response = await fetch("/api/assess", { method: "POST",
+    headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  const data = await response.json();
+  $("status").textContent = "";
+
+  if (!response.ok) {
+    fail(typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail));
+    return;
+  }
+  render(data);
+}
+
+function fail(message) {
+  $("error").textContent = message;
+  $("error").classList.remove("hidden");
+  $("status").textContent = "";
+  $("error").scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+/* ---------- display what came back ---------- */
+
+function render(r) {
+  const style = { "ON-SITE EXPERT": "onsite", "REMOTE SPECIALIST": "remote",
+    "SELF-ASSESSMENT": "self", "READINESS IMPROVEMENT / HOLD": "hold" }[r.selected_mode] || "hold";
+  const hold = r.selected_mode.startsWith("READINESS");
+  const span = a => !a ? "not reported"
+    : (Math.abs(a[0] - a[1]) < 1e-9 ? Math.abs(a[0]).toFixed(2)
+       : `${a[0].toFixed(2)} \u2013 ${a[1].toFixed(2)}`);
+
+  const readinessBars = Object.entries(r.readiness_vector).map(([key, value]) => `
+    <div class="bars"><div>${esc(key.replace(/_/g, " "))}</div>
+      <div class="bar"><i class="lS" style="width:${value}%"></i></div>
+      <div class="lv">${value.toFixed(1)}</div></div>`).join("");
+
+  const hazardBars = Object.entries(r.hazard_vector).map(([key, code]) => `
+    <div class="bars"><div>${esc(key.replace(/_/g, " "))}</div>
+      <div class="bar"><i class="l${code}" style="width:${code / 3 * 100}%"></i></div>
+      <div class="lv">${LEVELS[code]}</div></div>`).join("");
+
+  $("results").innerHTML = `
+    <div class="banner ${style}">
+      <div class="l">${hold ? "Phase 1 disposition" : "Phase 2 assessment mode"}</div>
+      <div class="m">${esc(r.selected_mode)}</div>
+      <div>${esc(r.rationale)}</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">Gate G</div>
+        <div class="v" style="color:${r.readiness_gate ? "var(--green)" : "var(--red)"}">
+          ${r.readiness_gate ? 1 : 0}</div></div>
+      <div class="stat"><div class="k">CRIS</div><div class="v">${r.cris} / 18</div></div>
+      <div class="stat"><div class="k">Interaction R</div>
+        <div class="v">${r.normalized_interaction.toFixed(2)}</div></div>
+      <div class="stat"><div class="k">Readiness RI</div>
+        <div class="v" style="font-size:15px">${span(r.readiness_interval)}</div></div>
+      <div class="stat"><div class="k">Opportunity OP</div>
+        <div class="v" style="font-size:15px">${span(r.opportunity_interval)}</div></div>
+      <div class="stat"><div class="k">Criticality AC</div>
+        <div class="v" style="font-size:15px">
+          ${span(r.assessment_criticality_interval)}</div></div>
+    </div>
+
+    <section><h2>Readiness vector<small>Equation (4), from the evidence you scored</small></h2>
+      <div class="body">${readinessBars}</div></section>
+
+    <section><h2>Hazard-interaction vector<small>retained in full; CRIS never replaces it</small></h2>
+      <div class="body">${hazardBars}</div></section>
+
+    <section><h2>Next actions</h2><div class="body">
+      <ul style="margin:0;padding-left:20px">
+        ${r.next_actions.map(a => `<li>${esc(a)}</li>`).join("") || "<li>None recorded.</li>"}
+      </ul></div></section>
+
+    <section><h2>Assessment record<small>${esc(r.assessment_id)} &middot;
+      ${esc(r.timestamp_utc)}</small></h2>
+      <div class="body"><pre>${esc(JSON.stringify(r, null, 2))}</pre></div></section>`;
+
+  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+$("run").onclick = run;
+$("clear").onclick = () => location.reload();
+</script>
+</body>
+</html>
