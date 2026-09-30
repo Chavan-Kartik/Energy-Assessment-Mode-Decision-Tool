@@ -58,6 +58,13 @@ storage.initialise()
 app = FastAPI(title="Risk-Informed Energy Assessment")
 
 
+@app.exception_handler(Exception)
+async def unexpected_error(request, error: Exception) -> JSONResponse:
+    """Return a readable message instead of a bare 500, so the page can show it."""
+    return JSONResponse(status_code=500,
+                        content={"detail": f"Server error: {type(error).__name__}: {error}"})
+
+
 # ---------------------------------------------------------------------------
 # What the form sends
 # ---------------------------------------------------------------------------

@@ -24,15 +24,17 @@ from typing import Any, Iterator, Optional
 
 def _default_db_path() -> Path:
     """
-    Beside the code when run locally. Serverless hosts such as Vercel only allow
-    writes to the temporary directory, so the store moves there; its history then
-    lasts only as long as the running instance. EAF_DB_PATH overrides both.
+    Beside the code when that folder is writable, as it is locally. Serverless hosts
+    such as Vercel only allow writes to the temporary directory, so the store moves
+    there; its history then lasts only as long as the running instance.
+    EAF_DB_PATH overrides both.
     """
     if os.environ.get("EAF_DB_PATH"):
         return Path(os.environ["EAF_DB_PATH"])
-    if os.environ.get("VERCEL"):
-        return Path(tempfile.gettempdir()) / "assessment_records.db"
-    return Path(__file__).parent / "assessment_records.db"
+    here = Path(__file__).parent
+    if not os.environ.get("VERCEL") and os.access(here, os.W_OK):
+        return here / "assessment_records.db"
+    return Path(tempfile.gettempdir()) / "assessment_records.db"
 
 
 DB_PATH = _default_db_path()

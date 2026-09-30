@@ -641,7 +641,6 @@
     <span class="sub">Upstream oil &amp; gas &middot; decision-support tool for Algorithm 1</span>
     <span class="spacer"></span>
     <span class="meta" id="tb-run">no run yet</span>
-    <button id="capture" title="Lock the window to 1440 &times; 900 so every screenshot is the same size">Capture mode</button>
   </div>
 
   <div id="notice">
@@ -748,7 +747,16 @@ const form = {
 /* ---------------- start up ---------------- */
 
 async function boot() {
-  BOOT = await (await fetch("/api/bootstrap")).json();
+  try {
+    const response = await fetch("/api/bootstrap");
+    if (!response.ok) throw new Error(`${response.status} ${(await response.text()).slice(0, 300)}`);
+    BOOT = await response.json();
+  } catch (error) {
+    document.body.insertAdjacentHTML("afterbegin",
+      `<div style="padding:14px 18px;background:#fbe9e7;color:#8a1c12;font:14px sans-serif">
+        The assessment server did not respond, so the tool cannot load. ${esc(error.message)}</div>`);
+    return;
+  }
 
   form.readiness = structuredClone(BOOT.default_evidence);
   BOOT.conditions.forEach(c => { form.flags[c.key] = false; });
@@ -776,7 +784,6 @@ async function openFromUrl() {
 
   if (q.get("capture") === "1") {
     document.body.classList.add("capture");
-    $("capture").classList.add("on");
   }
 
   try {
@@ -1902,10 +1909,6 @@ function wire() {
   };
 }
 
-$("capture").onclick = () => {
-  document.body.classList.toggle("capture");
-  $("capture").classList.toggle("on");
-};
 
 /* =========================================================================
    server calls
@@ -1996,20 +1999,32 @@ async function run() {
     case_run_key: form.case_run_key,
   };
 
-  const response = await fetch("/api/assess", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-  const data = await response.json();
-  button.disabled = false;
+  let response, data;
+  try {
+    response = await fetch("/api/assess", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const text = await response.text();
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { detail: `The server returned ${response.status} ${response.statusText}: ${text.slice(0, 300)}` };
+    }
+  } catch (error) {
+    response = { ok: false };
+    data = { detail: `Could not reach the server: ${error.message}` };
+  } finally {
+    button.disabled = false;
+  }
 
   if (!response.ok) {
     RESULT = null;
     LAYER = 1;
     render();
     $("pane").insertAdjacentHTML("afterbegin",
-      `<div id="err"><b>The framework rejected these inputs.</b><br>${
+      `<div id="err"><b>The assessment did not run.</b><br>${
         esc(typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail))}</div>`);
     $("run-msg").innerHTML = `<b style="color:var(--red)">Not run. See the message above.</b>`;
     return;
