@@ -5,490 +5,2028 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Risk-Informed Energy Assessment</title>
 <style>
-  :root { --ink:#12202c; --soft:#5a6f7d; --line:#dbe4ea; --bg:#f5f8fa; --brand:#15506b;
-          --red:#b3261e; --amber:#9a6212; --green:#1d6f42;
-          --mono: ui-monospace, Consolas, monospace; }
-  * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink);
-         font:14px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
-  header { background:var(--brand); color:#fff; padding:14px 24px; }
-  header h1 { margin:0; font-size:16px; }
-  header p { margin:2px 0 0; font-size:12px; opacity:.85; }
-  .notice { background:#fdf3e2; border-bottom:1px solid #e8d5ac; color:var(--amber);
-            font-size:12px; padding:7px 24px; }
-  main { max-width:980px; margin:0 auto; padding:20px 24px 60px; }
-  section { background:#fff; border:1px solid var(--line); border-radius:8px; margin-bottom:16px; }
-  section > h2 { margin:0; padding:12px 16px; font-size:15px; border-bottom:1px solid #eef3f6; }
-  section > h2 small { font-weight:400; color:var(--soft); font-size:12px; margin-left:8px; }
-  .body { padding:16px; }
-  .grid3 { display:grid; gap:14px; grid-template-columns:1fr 1fr 1fr; }
-  .grid2 { display:grid; gap:14px; grid-template-columns:1fr 1fr; }
-  @media (max-width:820px) { .grid3,.grid2 { grid-template-columns:1fr; } }
-  label.f { display:block; font-size:12px; font-weight:600; color:var(--soft); margin-bottom:4px; }
-  input[type=text], input[type=number], select { width:100%; padding:7px 9px;
-      border:1px solid var(--line); border-radius:5px; font:inherit; background:#fff; }
-  .row { margin-bottom:12px; }
-  fieldset { border:1px solid var(--line); border-radius:6px; margin:0 0 12px; padding:0; }
-  legend { font-size:13px; font-weight:600; padding:0 8px; margin-left:8px; }
+  /* ---------------------------------------------------------------------
+     The four layers of the decision-support-tool architecture in Figure 3:
+     input and evidence, analytics and robustness, decision and governance,
+     output and learning. Each layer is sized to one screen so that a single
+     screenshot shows a complete stage of the assessment.
+     --------------------------------------------------------------------- */
 
-  .ev { display:grid; grid-template-columns:20px 1fr 78px 96px auto; gap:8px; align-items:center;
-        padding:5px 12px; border-top:1px solid #eef3f6; font-size:13px; }
-  .ev.head { border-top:none; background:#fafcfd; font-size:11px; font-weight:700;
-             color:var(--soft); text-transform:uppercase; letter-spacing:.05em; padding:6px 12px; }
-  .ev .del { cursor:pointer; color:#c3ced5; font-size:17px; text-align:center; user-select:none; }
-  .ev .del:hover { color:var(--red); }
-  .ev input.nm { border:1px solid transparent; background:transparent; padding:4px 6px; }
-  .ev input.nm:hover { border-color:var(--line); }
-  .ev input.nm:focus { border-color:var(--brand); background:#fff; outline:none; }
-  .ev.req input.nm { font-weight:600; }
-  .reqbox { display:flex; align-items:center; gap:5px; font-size:11.5px; color:var(--soft); }
-  .reqbox input { width:14px; height:14px; accent-color:var(--red); margin:0; flex:none; }
-  select.tau { padding:3px 5px; font-size:12px; }
-  select.tau.off { visibility:hidden; }
-  .seg { display:flex; border:1px solid var(--line); border-radius:5px; overflow:hidden; }
-  .seg label { padding:3px 9px; font-size:12px; cursor:pointer; color:var(--soft);
-               border-right:1px solid var(--line); background:#fff; }
-  .seg label:last-child { border-right:none; }
-  .seg input { position:absolute; opacity:0; width:0; height:0; }
-  .seg label:has(input:checked) { background:var(--brand); color:#fff; font-weight:600; }
-  .addrow { padding:7px 12px; border-top:1px solid #eef3f6; }
-  .link { background:none; border:none; color:var(--brand); font-size:12px; font-weight:600;
-          cursor:pointer; padding:2px 0; }
-  .link.setall { border:1px solid var(--line); border-radius:4px; padding:1px 7px;
-                 margin-left:3px; }
-  .link.setall:hover { background:var(--brand); color:#fff; border-color:var(--brand); }
+  :root {
+    --ink:      #14212b;
+    --muted:    #5f7280;
+    --faint:    #8698a4;
+    --line:     #ccd6dc;
+    --rule:     #e6ebee;
+    --paper:    #ffffff;
+    --surface:  #f2f5f6;
+    --accent:   #15506b;
+    --red:      #a32b21;
+    --amber:    #8a5a00;
+    --green:    #1a6b3e;
+    --slate:    #47606f;
+    --mono: "Cascadia Mono", ui-monospace, Consolas, "Liberation Mono", monospace;
+    --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --h-title: 34px;
+    --h-notice: 26px;
+    --h-status: 24px;
+  }
 
-  .check { display:flex; gap:9px; align-items:flex-start; padding:7px 0; font-size:13px;
-           border-bottom:1px solid #eef3f6; }
-  .check:last-child { border-bottom:none; }
-  .check input { margin-top:3px; width:15px; height:15px; accent-color:var(--brand); flex:none; }
-  .check .hint { display:block; color:var(--soft); font-size:12px; }
-  button.go { font:inherit; font-weight:600; padding:10px 20px; border-radius:6px;
-           border:1px solid var(--brand); background:var(--brand); color:#fff; cursor:pointer; }
-  button.sec { background:#fff; color:var(--brand); }
-  .banner { padding:16px 20px; border-radius:8px; border-left:5px solid; margin-bottom:14px; }
-  .banner .m { font-size:22px; font-weight:700; margin:2px 0 6px; }
-  .banner .l { font-size:11px; text-transform:uppercase; letter-spacing:.07em; opacity:.75; }
-  .onsite { background:#fdecea; border-color:var(--red); color:#7d1a15; }
-  .remote { background:#fdf3e2; border-color:var(--amber); color:#6e460d; }
-  .self   { background:#e8f5ed; border-color:var(--green); color:#15522f; }
-  .hold   { background:#eceff1; border-color:#607d8b; color:#37474f; }
-  .stats { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
-  .stat { flex:1 1 130px; border:1px solid var(--line); border-radius:6px; padding:10px 12px;
-          background:#fff; }
-  .stat .k { font-size:11px; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; }
-  .stat .v { font-size:19px; font-weight:700; font-family:var(--mono); }
-  .bars { display:grid; grid-template-columns:200px 1fr 64px; gap:10px; align-items:center;
-          padding:3px 0; font-size:13px; }
-  .bars .bar { height:15px; background:#eef3f6; border-radius:3px; overflow:hidden; }
-  .bars .bar i { display:block; height:100%; }
-  .bars .lv { font-size:11px; font-weight:700; text-align:right; font-family:var(--mono); }
-  .l3{background:var(--red)} .l2{background:#d98324} .l1{background:#6ea8bd}
-  .l0{background:#c6d2d9} .lS{background:#6ea8bd}
-  pre { background:#0f2130; color:#cfe3ef; padding:13px; border-radius:6px; overflow:auto;
-        max-height:320px; font-family:var(--mono); font-size:11.5px; margin:0; }
-  .muted { color:var(--soft); font-size:12px; }
-  .err { background:#fdecea; border:1px solid #f2c2be; color:var(--red); padding:10px 14px;
-         border-radius:6px; margin-bottom:12px; }
-  .hidden { display:none; }
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font: 13px/1.5 var(--sans);
+    overflow: hidden;
+  }
+
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* ---- shell ---------------------------------------------------------- */
+
+  #shell {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: var(--h-title) var(--h-notice) 1fr var(--h-status);
+    background: var(--paper);
+  }
+
+  body.capture {
+    display: grid;
+    place-items: center;
+    background: #6b7b85;
+  }
+  body.capture #shell {
+    width: 1440px;
+    height: 900px;
+    border: 1px solid #3c4c56;
+    box-shadow: 0 2px 18px rgba(0,0,0,.35);
+  }
+
+  /* ---- title bar ------------------------------------------------------ */
+
+  #titlebar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 14px;
+    background: var(--accent);
+    color: #fff;
+  }
+  #titlebar h1 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    white-space: nowrap;
+  }
+  #titlebar .sub {
+    font-size: 11px;
+    opacity: .78;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #titlebar .spacer { flex: 1; }
+  #titlebar .meta {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    opacity: .8;
+    white-space: nowrap;
+  }
+  #titlebar button {
+    font: inherit;
+    font-size: 11px;
+    padding: 3px 9px;
+    border: 1px solid rgba(255,255,255,.45);
+    background: transparent;
+    color: #fff;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  #titlebar button:hover { background: rgba(255,255,255,.14); }
+  #titlebar button.on { background: #fff; color: var(--accent); border-color: #fff; }
+
+  /* ---- standing notice ------------------------------------------------ */
+
+  #notice {
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    background: #fbf4e4;
+    border-bottom: 1px solid #e6d5ab;
+    color: #6d4a08;
+    font-size: 11px;
+  }
+
+  /* ---- body ----------------------------------------------------------- */
+
+  #body {
+    display: grid;
+    grid-template-columns: 228px 1fr 268px;
+    min-height: 0;
+  }
+
+  /* ---- layer rail ----------------------------------------------------- */
+
+  #rail {
+    border-right: 1px solid var(--line);
+    background: #f7f9fa;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .rail-head {
+    padding: 9px 12px 6px;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--faint);
+  }
+  .layer {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 8px;
+    padding: 9px 12px;
+    border-top: 1px solid var(--rule);
+    cursor: pointer;
+    align-items: start;
+  }
+  .layer:hover { background: #eef3f5; }
+  .layer.active { background: var(--paper); box-shadow: inset 3px 0 0 var(--accent); }
+  .layer .n {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--faint);
+    padding-top: 1px;
+  }
+  .layer.active .n { color: var(--accent); }
+  .layer .t { font-size: 12px; font-weight: 600; }
+  .layer.active .t { color: var(--accent); }
+  .layer .d { font-size: 10.5px; color: var(--muted); line-height: 1.35; margin-top: 1px; }
+  .layer.locked { opacity: .45; cursor: default; }
+  .layer.locked:hover { background: transparent; }
+
+  #rail .foot {
+    margin-top: auto;
+    border-top: 1px solid var(--line);
+    padding: 8px 12px;
+    font-size: 10px;
+    color: var(--faint);
+    line-height: 1.45;
+  }
+
+  /* ---- workspace ------------------------------------------------------ */
+
+  #workspace { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+
+  #tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--line);
+    background: #fafcfc;
+    padding: 0 10px;
+    min-height: 31px;
+    align-items: stretch;
+  }
+  #tabs .tab {
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+    font-size: 11.5px;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  #tabs .tab:hover { color: var(--ink); }
+  #tabs .tab.active {
+    color: var(--accent);
+    font-weight: 600;
+    border-bottom-color: var(--accent);
+  }
+  #tabs .eq {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    font-size: 10.5px;
+    color: var(--faint);
+    font-family: var(--mono);
+    padding-left: 14px;
+  }
+
+  #pane { flex: 1; overflow: auto; padding: 14px 16px 18px; min-height: 0; }
+
+  /* ---- generic blocks ------------------------------------------------- */
+
+  h2.sec {
+    margin: 0 0 8px;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--faint);
+  }
+  h2.sec span { font-weight: 400; text-transform: none; letter-spacing: 0; margin-left: 7px; }
+
+  .panel { border: 1px solid var(--line); background: var(--paper); margin-bottom: 14px; }
+  .panel > .ph {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 7px 11px;
+    border-bottom: 1px solid var(--rule);
+    background: #fafcfc;
+  }
+  .panel > .ph b { font-size: 11.5px; font-weight: 600; }
+  .panel > .ph .eqref { font-size: 10.5px; color: var(--faint); font-family: var(--mono); }
+  .panel > .ph .right { margin-left: auto; font-size: 10.5px; color: var(--muted); }
+  .panel > .pb { padding: 11px; }
+
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  .cols3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; align-items: start; }
+
+  .note { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .note.tight { margin: 0 0 8px; }
+
+  label.f {
+    display: block;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--faint);
+    margin-bottom: 3px;
+  }
+  input[type=text], input[type=number], select, textarea {
+    width: 100%;
+    padding: 5px 7px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font: inherit;
+    color: var(--ink);
+    border-radius: 2px;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(21,80,107,.13);
+  }
+  .field { margin-bottom: 10px; }
+
+  button.act {
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  button.act.ghost { background: var(--paper); color: var(--accent); }
+  button.act.ghost:hover { background: #eaf1f4; }
+  button.act:disabled { opacity: .45; cursor: default; }
+  button.mini {
+    font: inherit;
+    font-size: 10.5px;
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 2px;
+  }
+  button.mini:hover { border-color: var(--accent); color: var(--accent); }
+  button.link {
+    font: inherit;
+    font-size: 11px;
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+  }
+
+  table.grid { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  table.grid th {
+    text-align: left;
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--faint);
+    padding: 5px 8px;
+    border-bottom: 1px solid var(--line);
+    background: #fafcfc;
+    white-space: nowrap;
+  }
+  table.grid td { padding: 4px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  table.grid tr:last-child td { border-bottom: none; }
+  table.grid td.r, table.grid th.r { text-align: right; }
+  table.grid tr.flagged td { background: #fdf0ee; }
+  table.grid tr.dim td { color: var(--faint); }
+  table.grid.fixed { table-layout: fixed; }
+  table.grid td.clip { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ---- evidence master-detail ----------------------------------------- */
+
+  .dimlist { border: 1px solid var(--line); }
+  .dimrow {
+    display: grid;
+    grid-template-columns: 26px 1fr auto;
+    gap: 7px;
+    align-items: center;
+    padding: 7px 9px;
+    border-bottom: 1px solid var(--rule);
+    cursor: pointer;
+  }
+  .dimrow:last-child { border-bottom: none; }
+  .dimrow:hover { background: #f5f8f9; }
+  .dimrow.active { background: #eaf1f4; box-shadow: inset 2px 0 0 var(--accent); }
+  .dimrow .sym { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .dimrow .nm { font-size: 11.5px; font-weight: 600; }
+  .dimrow .sub { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+  .dimrow .gate { font-size: 9.5px; font-weight: 700; letter-spacing: .04em; }
+
+  .ev {
+    display: grid;
+    grid-template-columns: 1fr 40px 58px 116px 16px;
+    gap: 7px;
+    align-items: center;
+    padding: 3px 9px;
+    border-bottom: 1px solid var(--rule);
+  }
+  .ev.head {
+    background: #fafcfc;
+    border-bottom: 1px solid var(--line);
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--faint);
+    padding: 5px 9px;
+  }
+  .ev.gatefail { background: #fdf0ee; }
+  .ev.gateok { background: #f2f8f4; }
+  .ev input.nm {
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 3px 4px;
+    font-size: 11.5px;
+  }
+  .ev input.nm:hover { border-color: var(--line); }
+  .ev.mand input.nm { font-weight: 600; }
+  .ev .chk { display: flex; align-items: center; justify-content: center; }
+  .ev .chk input { width: 13px; height: 13px; margin: 0; accent-color: var(--red); }
+  .ev select.tau { padding: 2px 3px; font-size: 10.5px; }
+  .ev select.tau.off { visibility: hidden; }
+  .ev .del { text-align: center; color: #bcc8ce; cursor: pointer; font-size: 15px; user-select: none; }
+  .ev .del:hover { color: var(--red); }
+
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+  .seg label {
+    flex: 1;
+    text-align: center;
+    padding: 2px 0;
+    font-size: 10.5px;
+    font-family: var(--mono);
+    color: var(--muted);
+    cursor: pointer;
+    border-right: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .seg label:last-child { border-right: none; }
+  .seg input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .seg label:has(input:checked) { background: var(--accent); color: #fff; font-weight: 700; }
+
+  .evfoot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 9px;
+    background: #fafcfc;
+    border-top: 1px solid var(--rule);
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+
+  /* ---- bars and intervals --------------------------------------------- */
+
+  .bar {
+    display: grid;
+    grid-template-columns: 1fr 148px 54px;
+    gap: 9px;
+    align-items: center;
+    padding: 3px 0;
+    font-size: 11.5px;
+  }
+  .bar .track { height: 12px; background: #eaeff2; position: relative; }
+  .bar .track i { display: block; height: 100%; background: var(--accent); }
+  .bar .v { text-align: right; font-family: var(--mono); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .bar .lab { color: var(--ink); }
+  .bar .lab em { color: var(--faint); font-style: normal; font-family: var(--mono); margin-right: 5px; }
+  .l3 { background: var(--red) !important; }
+  .l2 { background: #c07a17 !important; }
+  .l1 { background: #7fa3b5 !important; }
+  .l0 { background: #c9d3d9 !important; }
+
+  .interval { margin: 4px 0 2px; }
+  .interval .scale { position: relative; height: 22px; }
+  .interval .axis {
+    position: absolute; left: 0; right: 0; top: 9px; height: 4px;
+    background: #eaeff2;
+  }
+  .interval .band {
+    position: absolute; top: 5px; height: 12px;
+    background: var(--accent); opacity: .85;
+  }
+  .interval .band.wide { background: #7fa3b5; }
+  .interval .point {
+    position: absolute; top: 3px; width: 2px; height: 16px; background: var(--accent);
+  }
+  .interval .ticks {
+    display: flex; justify-content: space-between;
+    font-family: var(--mono); font-size: 9.5px; color: var(--faint);
+  }
+  .interval .readout {
+    font-family: var(--mono); font-size: 17px; font-weight: 700;
+    font-variant-numeric: tabular-nums; letter-spacing: -.01em;
+  }
+  .wvec { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 11.5px; }
+  .kv dt { color: var(--muted); white-space: nowrap; }
+  .kv dd { margin: 0; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  /* ---- disposition ---------------------------------------------------- */
+
+  .disp { border: 1px solid; border-left-width: 4px; padding: 8px 12px; margin-bottom: 11px; }
+  .disp .l {
+    font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; opacity: .8;
+  }
+  .disp .m { font-size: 19px; font-weight: 700; margin: 1px 0 4px; letter-spacing: -.01em; }
+  .disp .r { font-size: 11px; line-height: 1.45; }
+  .actions {
+    display: flex; gap: 9px; align-items: baseline;
+    border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    background: #f7fafb; padding: 5px 10px; margin-bottom: 11px; font-size: 11px;
+  }
+  .actions .k {
+    font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .07em; color: var(--faint); white-space: nowrap;
+  }
+  .disp-onsite { background: #fcefed; border-color: var(--red); color: #7a2019; }
+  .disp-remote { background: #fbf4e4; border-color: var(--amber); color: #6a4600; }
+  .disp-self   { background: #eff7f2; border-color: var(--green); color: #145430; }
+  .disp-hold   { background: #eef1f3; border-color: var(--slate); color: #364854; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    border: 1px solid var(--line); background: var(--paper);
+    padding: 2px 7px; font-size: 10.5px; border-radius: 2px;
+  }
+  .chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #c9d3d9; }
+  .chip.on { border-color: #b9ccd6; background: #f3f8fa; color: var(--accent); font-weight: 600; }
+  .chip.on .dot { background: var(--accent); }
+  .chip.pass { border-color: #b7d8c4; background: #f2f8f4; color: var(--green); }
+  .chip.pass .dot { background: var(--green); }
+  .chip.fail { border-color: #e8bdb7; background: #fdf0ee; color: var(--red); font-weight: 600; }
+  .chip.fail .dot { background: var(--red); }
+
+  .rule {
+    display: grid;
+    grid-template-columns: 52px 1fr 150px 74px;
+    gap: 9px;
+    padding: 3px 9px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 11.5px;
+    align-items: baseline;
+    line-height: 1.35;
+  }
+  .rule:last-child { border-bottom: none; }
+  .rule .ph { font-family: var(--mono); font-size: 10px; color: var(--faint); }
+  .rule .cond { color: var(--muted); font-size: 10.5px; }
+  .rule .md { font-family: var(--mono); font-size: 10.5px; color: var(--muted); }
+  .rule .st {
+    text-align: right; font-size: 9.5px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em; color: var(--faint);
+  }
+  .rule.applied { background: #f3f8fa; }
+  .rule.applied .lb { font-weight: 700; color: var(--accent); }
+  .rule.applied .md, .rule.applied .st { color: var(--accent); }
+  .rule.notreached { opacity: .5; }
+
+  .struck { text-decoration: line-through; color: var(--faint) !important; }
+
+  /* ---- status column -------------------------------------------------- */
+
+  #status {
+    border-left: 1px solid var(--line);
+    background: #f7f9fa;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  #status .sc { padding: 9px 11px; border-bottom: 1px solid var(--rule); }
+  #status .sc:last-of-type { border-bottom: none; }
+  #status .sh {
+    font-size: 9.5px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--faint); margin-bottom: 6px;
+  }
+  #status .scroll { overflow: auto; min-height: 0; flex: 1; }
+  #status .runfoot {
+    border-top: 1px solid var(--line);
+    padding: 9px 11px;
+    background: #eef3f5;
+  }
+  #status .runfoot button { width: 100%; }
+  #status .msg { font-size: 10.5px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+  .minidisp { padding: 7px 9px; border: 1px solid; border-left-width: 3px; }
+  .minidisp .l { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; opacity: .8; }
+  .minidisp .m { font-size: 13px; font-weight: 700; line-height: 1.25; margin-top: 2px; }
+  .sbar {
+    display: grid; grid-template-columns: 20px 1fr 42px; gap: 6px;
+    align-items: center; font-size: 10.5px; padding: 1.5px 0;
+  }
+  .sbar .sy { font-family: var(--mono); color: var(--faint); font-size: 10px; }
+  .sbar .tr { height: 9px; background: #e6ebee; }
+  .sbar .tr i { display: block; height: 100%; background: var(--accent); }
+  .sbar .vv { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .gitem {
+    display: grid; grid-template-columns: 12px 1fr 30px; gap: 6px;
+    align-items: baseline; font-size: 10.5px; padding: 2px 0; line-height: 1.35;
+  }
+  .gitem .mk { font-weight: 700; font-size: 11px; }
+  .gitem.ok .mk { color: var(--green); }
+  .gitem.no .mk { color: var(--red); }
+  .gitem.no .gn { color: var(--red); font-weight: 600; }
+  .gitem .gv {
+    text-align: right; font-family: var(--mono); font-size: 10px; color: var(--faint);
+  }
+  .pending { color: var(--faint); font-size: 10.5px; font-style: italic; }
+
+  /* ---- status bar ----------------------------------------------------- */
+
+  #statusbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 12px;
+    border-top: 1px solid var(--line);
+    background: #eef3f5;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  #statusbar .sep { color: var(--line); }
+  #statusbar .grow { flex: 1; }
+  #statusbar b { color: var(--ink); font-weight: 700; }
+
+  /* ---- misc ----------------------------------------------------------- */
+
+  #err {
+    margin-bottom: 12px; padding: 8px 11px;
+    border: 1px solid #e2b7b1; border-left: 3px solid var(--red);
+    background: #fdf0ee; color: #7a2019; font-size: 11.5px;
+  }
+  pre.raw {
+    margin: 0; padding: 10px; background: #10222f; color: #cddfea;
+    font-family: var(--mono); font-size: 10.5px; line-height: 1.45;
+    overflow: auto; max-height: 280px;
+  }
+  details.raw > summary {
+    cursor: pointer; font-size: 11px; color: var(--accent);
+    padding: 6px 0; user-select: none;
+  }
+  .badge {
+    display: inline-flex; align-items: baseline; gap: 7px;
+    border: 1px solid #b7d8c4; background: #f2f8f4;
+    padding: 5px 10px; color: var(--green);
+  }
+  .badge.bad { border-color: #e8bdb7; background: #fdf0ee; color: var(--red); }
+  .badge .n { font-family: var(--mono); font-size: 16px; font-weight: 700; }
+  .badge .t { font-size: 11px; }
+  .hide { display: none !important; }
+  .caserow {
+    display: grid; grid-template-columns: 22px 1fr auto; gap: 9px;
+    padding: 7px 9px; border-bottom: 1px solid var(--rule); align-items: start;
+  }
+  .caserow:last-child { border-bottom: none; }
+  .caserow .cn { font-family: var(--mono); font-size: 11px; color: var(--faint); font-weight: 700; }
+  .caserow .ct { font-size: 11.5px; font-weight: 600; }
+  .caserow .cq { font-size: 11px; color: var(--muted); font-style: italic; }
+  .caserow .cr { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
+  .runpick { display: flex; align-items: center; gap: 6px; font-size: 10.5px; }
+  .runpick .ex { font-family: var(--mono); font-size: 9.5px; color: var(--faint); }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Risk-Informed, Readiness-Aware Energy Assessment</h1>
-  <p>Upstream oil &amp; gas &middot; front end for the reference implementation of Algorithm 1</p>
-</header>
-<div class="notice">
-  Screening and assessment-planning support only. Not a substitute for PHA, HAZOP, quantitative
-  risk assessment, management of change, or operator engineering approval.
+<div id="shell">
+
+  <div id="titlebar">
+    <h1>Risk-Informed, Readiness-Aware Energy Assessment</h1>
+    <span class="sub">Upstream oil &amp; gas &middot; decision-support tool for Algorithm 1</span>
+    <span class="spacer"></span>
+    <span class="meta" id="tb-run">no run yet</span>
+    <button id="capture" title="Lock the window to 1440 &times; 900 so every screenshot is the same size">Capture mode</button>
+  </div>
+
+  <div id="notice">
+    Screening and assessment-planning support only. Not a substitute for PHA, HAZOP,
+    quantitative risk assessment, management of change, or operator engineering approval.
+  </div>
+
+  <div id="body">
+
+    <div id="rail">
+      <div class="rail-head">Architecture layers &middot; Figure 3</div>
+      <div id="layers"></div>
+      <div class="foot" id="rail-foot"></div>
+    </div>
+
+    <div id="workspace">
+      <div id="tabs"></div>
+      <div id="pane"></div>
+    </div>
+
+    <div id="status">
+      <div class="scroll" id="status-body"></div>
+      <div class="runfoot">
+        <button class="act" id="run">Run assessment</button>
+        <div class="msg" id="run-msg">Algorithm 1 runs on the values now in the form.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="statusbar"></div>
+
 </div>
 
-<main>
-  <div id="error" class="err hidden"></div>
-
-  <section>
-    <h2>1 &nbsp; Assessment scope</h2>
-    <div class="body"><div class="grid3">
-      <div><label class="f">Facility</label><input type="text" id="facility"></div>
-      <div><label class="f">Assessor</label><input type="text" id="assessor"></div>
-      <div><label class="f">Measure (loads its Appendix B ratings below)</label>
-        <select id="eem"></select></div>
-    </div>
-    <p class="muted" id="eemnote" style="margin:10px 0 0"></p></div>
-  </section>
-
-  <section>
-    <h2>2 &nbsp; Readiness evidence<small>Appendix C checklist &middot; Equations (4) and (7)</small></h2>
-    <div class="body">
-      <p class="muted" style="margin-top:0">
-        Items are coded <b>0</b> absent, <b>1</b> partial or outdated, <b>2</b> current and
-        demonstrated, <b>N/A</b> removed from the denominator. The list below is the evidence
-        named in Appendix C Table C1; Section 4.5 requires the assessment team to define the
-        item set and the mandatory subset <b>C</b> for their own scope, so every row can be
-        renamed, deleted, or added to, and any row can be marked required.
-        <b>The paper does not prescribe the acceptance thresholds &tau;</b> &mdash; the four
-        rows pre-marked required are the examples given in Section 4.5, and &tau; is yours to set.
-      </p>
-      <div id="checklists"></div>
-      <div class="row" style="margin-top:12px">
-        <label class="f">Readiness weight set W</label>
-        <select id="wmode">
-          <option value="bounded" selected>Bounded 0.10 &le; w &le; 0.35 &mdash; returns an interval</option>
-          <option value="equal">Equal weights &mdash; returns a single value</option>
-        </select>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2>3 &nbsp; Hazard-interaction ratings<small>the six domains of Equation (1)</small></h2>
-    <div class="body">
-      <p class="muted" style="margin-top:0">Pre-filled from the selected measure's Appendix B
-      coding. Change any of them and CRIS is recalculated by the framework. Note that the
-      framework accepts only 0&ndash;3, so a domain that has <i>not yet been assessed</i> cannot
-      be distinguished from one rated 0.</p>
-      <div class="grid3" id="hazards"></div>
-    </div>
-  </section>
-
-  <section>
-    <h2>4 &nbsp; Criticality inputs<small>Equation (9)</small></h2>
-    <div class="body">
-      <div class="grid3">
-        <div><label class="f">Data sufficiency D (0&ndash;100)</label>
-          <input type="number" id="D" min="0" max="100" value="50">
-          <span class="muted">Enters as the deficit 100&minus;D.</span></div>
-        <div><label class="f">Action complexity C (0&ndash;100)</label>
-          <input type="number" id="C" min="0" max="100" value="50"></div>
-        <div><label class="f">Direct-verification need V (0&ndash;100)</label>
-          <input type="number" id="V" min="0" max="100" value="50"></div>
-      </div>
-      <p class="muted" style="margin:2px 0 12px">D, C and V are expert judgements entered by the
-      assessment team. The paper defines their meaning and range but sets no scoring rubric.</p>
-      <div class="grid2">
-        <div><label class="f">Opportunity scores (comma separated, optional)</label>
-          <input type="text" id="opp" placeholder="e.g. 80, 75, 70"></div>
-        <div><label class="f">Criticality weight set Q</label>
-          <select id="qmode">
-            <option value="equal" selected>Equal weights</option>
-            <option value="bounded">Bounded 0.15 &le; q &le; 0.40</option>
-          </select></div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <h2>5 &nbsp; Evidence and verification conditions<small>Table 4</small></h2>
-    <div class="body">
-      <div id="flags"></div>
-      <div class="row" style="margin-top:12px">
-        <label class="f">Reviewer rationale (recorded verbatim)</label>
-        <input type="text" id="rationale">
-      </div>
-      <button class="go" id="run">Run assessment</button>
-      <button class="go sec" id="clear">Reset form</button>
-      <span class="muted" id="status" style="margin-left:10px"></span>
-    </div>
-  </section>
-
-  <div id="results"></div>
-</main>
-
 <script>
-/* This script collects form values and displays what the server returns.
-   It performs no part of the assessment calculation. */
+/* ---------------------------------------------------------------------------
+   This script collects form values, sends them to the server, and displays what
+   comes back. It performs no part of the assessment calculation: every reported
+   quantity is produced by assessment_framework.py. The only arithmetic here is
+   counting entered evidence points and summing entered hazard ratings, both of
+   which are read-backs of the input and are labelled as such.
+   --------------------------------------------------------------------------- */
 
-/* Evidence items transcribed from Appendix C, Table C1 ("evidence to verify").
-   [name, mandatory-by-default] — the four defaults are the examples in Section 4.5. */
-const APPENDIX_C = [
-  ["data_availability", "S\u2081 Data availability",
-   "Can the assessor obtain reliable operating and energy data?", [
-    ["Minimum process and energy data for the intended calculation", true],
-    ["Meter list", false], ["Electricity and fuel bills", false],
-    ["Historian tags", false], ["Flow, pressure and temperature trends", false],
-    ["Run hours", false], ["Production records", false],
-    ["Calibration certificates", false], ["Missing-data logs", false],
-    ["Demonstration of data extraction", false]]],
-  ["workforce_capability", "S\u2082 Workforce capability",
-   "Can the site's people collect, understand and use the required information?", [
-    ["Required engineering competence for this scope", true],
-    ["Interviews with operations, maintenance and engineering staff", false],
-    ["Training records", false], ["Competency matrices", false],
-    ["Examples of previous energy or reliability studies", false],
-    ["Ability to explain operating envelopes and abnormal conditions", false]]],
-  ["management_commitment", "S\u2083 Management commitment",
-   "Is there visible authority and ownership to support the assessment?", [
-    ["Safe access authorization", true],
-    ["Named sponsor", false], ["Approved assessment scope", false],
-    ["Meeting minutes", false], ["Energy or operating objectives", false],
-    ["Budget route", false], ["Management review records", false],
-    ["Evidence that previous recommendations were considered and closed", false]]],
-  ["baseline_status", "S\u2084 Baseline status",
-   "Is there a credible reference against which improvement can be measured?", [
-    ["Definable assessment boundary", true],
-    ["Historical energy and production data", false],
-    ["Normalized KPIs", false], ["Operating-mode records", false],
-    ["Weather or throughput normalization where relevant", false],
-    ["Documented baseline period", false], ["Explanation of major changes", false]]],
-  ["implementation_readiness", "S\u2085 Implementation readiness",
-   "Can an accepted recommendation actually be executed and verified?", [
-    ["Named action owner", false], ["Maintenance or work-order route", false],
-    ["Procurement path", false], ["Budget mechanism", false],
-    ["Shutdown or turnaround window", false], ["MOC or permit requirements", false],
-    ["Contractor availability", false], ["Schedule", false],
-    ["Measurement and verification plan", false]]]];
-
-const DOMAINS = [
-  ["well_control", "Well control"], ["fire_explosion", "Fire / explosion"],
-  ["electrical_hazard", "Electrical hazard"], ["toxic_exposure", "Toxic exposure"],
-  ["mechanical_failure", "Mechanical failure"], ["environmental_impact", "Environmental impact"]];
-
-const FLAGS = [
-  ["direct_verification_required", "Direct field observation or measurement is required",
-   "Non-compensatory: this alone selects on-site expert assessment."],
-  ["safety_override", "A safety override has been declared for this measure",
-   "Non-compensatory: this alone selects on-site expert assessment."],
-  ["digital_evidence_validated", "The available digital evidence is validated", ""],
-  ["specialist_interpretation_required", "Specialist interpretation is required", ""],
-  ["internal_capability_adequate", "Internal engineering capability is adequate", ""],
-  ["protocol_requirements_satisfied", "Internal protocol requirements are satisfied", ""],
-  ["unresolved_evidence_requires_field", "Any unresolved evidence gap would need field work",
-   "Used only for escalation when the self-assessment conditions are not met."]];
-
-const LEVELS = ["None", "Low", "Medium", "High"];
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"]/g,
   c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-let EEMS = [];
+const n2 = v => (v === null || v === undefined) ? "\u2014" : Number(v).toFixed(2);
 
-/* ---------- mutable checklist state ---------- */
+/* Long free-text values are shortened in the comparison table; the cell keeps the
+   full text as its tooltip and the stored record keeps it verbatim. */
+const shortValue = v => {
+  if (v === null || v === undefined) return "\u2014";
+  const s = typeof v === "string" ? v : JSON.stringify(v);
+  return s.length > 58 ? s.slice(0, 57) + "\u2026" : s;
+};
 
-const state = {};
-APPENDIX_C.forEach(([key, , , items]) => {
-  state[key] = items.map(([name, mandatory]) =>
-    ({ name, mandatory, threshold: 2, score: 0 }));
-});
+const LAYERS = [
+  { id: 1, title: "Input and evidence",
+    desc: "EEM library, readiness evidence, hazard ratings, preferences",
+    tabs: ["Scope", "Readiness evidence", "Hazard interaction", "Judgement inputs", "Conditions"] },
+  { id: 2, title: "Analytics and robustness",
+    desc: "CRIS, readiness and score envelopes, weight-space sensitivity",
+    tabs: [], needsRun: true },
+  { id: 3, title: "Decision and governance",
+    desc: "Readiness gate, safety overrides, mode rules, human review",
+    tabs: ["Decision", "Governance record"], needsRun: true },
+  { id: 4, title: "Output and learning",
+    desc: "Assessment record, action register, run comparison",
+    tabs: ["Assessment record", "Runs and comparison", "Manuscript reproduction"] },
+];
 
-function renderChecklists() {
-  $("checklists").innerHTML = APPENDIX_C.map(([key, title, question]) => {
-    const rows = state[key].map((item, i) => `
-      <div class="ev ${item.mandatory ? "req" : ""}">
-        <span class="del" data-act="del" data-dim="${key}" data-i="${i}"
-              title="Remove this item">&times;</span>
-        <input class="nm" type="text" value="${esc(item.name)}"
-               data-act="name" data-dim="${key}" data-i="${i}">
-        <label class="reqbox"><input type="checkbox" ${item.mandatory ? "checked" : ""}
-               data-act="mand" data-dim="${key}" data-i="${i}">required</label>
-        <select class="tau ${item.mandatory ? "" : "off"}"
-                data-act="tau" data-dim="${key}" data-i="${i}">
-          <option value="1" ${item.threshold === 1 ? "selected" : ""}>&tau; &ge; 1</option>
-          <option value="2" ${item.threshold === 2 ? "selected" : ""}>&tau; &ge; 2</option>
-        </select>
-        <div class="seg">
-          ${[0, 1, 2].map(v => `<label><input type="radio" name="${key}_${i}" value="${v}"
-             data-act="score" data-dim="${key}" data-i="${i}"
-             ${item.score === v ? "checked" : ""}>${v}</label>`).join("")}
-          <label><input type="radio" name="${key}_${i}" value="na"
-             data-act="score" data-dim="${key}" data-i="${i}"
-             ${item.score === null ? "checked" : ""}>N/A</label>
-        </div>
-      </div>`).join("");
+const DISP_CLASS = {
+  "ON-SITE EXPERT": "onsite",
+  "REMOTE SPECIALIST": "remote",
+  "SELF-ASSESSMENT": "self",
+  "READINESS IMPROVEMENT / HOLD": "hold",
+};
 
-    const applicable = state[key].filter(x => x.score !== null).length;
-    return `<fieldset><legend>${title}</legend>
-      <div class="ev head"><span></span><span>${esc(question)}</span>
-        <span>gate</span><span>threshold</span><span>rating</span></div>
-      ${rows}
-      <div class="addrow">
-        <button class="link" data-act="add" data-dim="${key}">+ add evidence item</button>
-        <span class="muted" style="margin-left:14px">score every row:</span>
-        ${["0", "1", "2", "N/A"].map(v =>
-          `<button class="link setall" data-act="all" data-dim="${key}"
-                   data-v="${v}">${v}</button>`).join("")}
-        <span class="muted" style="margin-left:14px">${applicable} applicable item${
-          applicable === 1 ? "" : "s"} &rarr; denominator 2 &times; ${applicable}
-          = ${2 * applicable}</span>
-      </div></fieldset>`;
-  }).join("");
+let BOOT = null;      // definitions from the server
+let RESULT = null;    // last server response
+let LAYER = 1;
+let TAB = 0;
+let EVDIM = "data_availability";
+let COMPARE = { a: null, b: null, data: null };
+let RUNLIST = [];
+let REPRO = null;
+
+const form = {
+  facility: "",
+  assessor: "",
+  eem_id: null,
+  readiness: {},
+  hazard: [0, 0, 0, 0, 0, 0],
+  D: 50, C: 50, V: 50,
+  opportunity: "",
+  wmode: "bounded",
+  qmode: "equal",
+  flags: {},
+  rationale: "",
+  case_id: null,
+  case_run_key: null,
+};
+
+/* ---------------- start up ---------------- */
+
+async function boot() {
+  BOOT = await (await fetch("/api/bootstrap")).json();
+
+  form.readiness = structuredClone(BOOT.default_evidence);
+  BOOT.conditions.forEach(c => { form.flags[c.key] = false; });
+  form.eem_id = BOOT.eems[0].eem_id;
+  applyEemRatings();
+
+  renderRail();
+  renderStatusBar();
+  render();
+
+  await openFromUrl();
 }
 
-$("checklists").addEventListener("input", event => {
-  const t = event.target, act = t.dataset.act;
-  if (!act) return;
-  const item = state[t.dataset.dim][Number(t.dataset.i)];
-  if (act === "name") { item.name = t.value; return; }          // no re-render: keeps focus
-  if (act === "score") { item.score = t.value === "na" ? null : Number(t.value); }
-  if (act === "mand") { item.mandatory = t.checked; }
-  if (act === "tau") { item.threshold = Number(t.value); return; }
-  renderChecklists();
-});
+/* A view can be addressed directly, which is how the figures in the appendix are
+   reproduced: ?case=override/onsite&run=1&layer=3&tab=0&capture=1
+   The parameters only load stored inputs and press the same button the user would;
+   there is no path here that reports a result without running the framework. */
 
-$("checklists").addEventListener("click", event => {
-  const t = event.target, act = t.dataset.act;
-  if (act === "add") {
-    state[t.dataset.dim].push({ name: "", mandatory: false, threshold: 2, score: 0 });
-  } else if (act === "del") {
-    state[t.dataset.dim].splice(Number(t.dataset.i), 1);
-  } else if (act === "all") {
-    const value = t.dataset.v === "N/A" ? null : Number(t.dataset.v);
-    state[t.dataset.dim].forEach(item => { item.score = value; });
-  } else { return; }
-  renderChecklists();
-});
+async function openFromUrl() {
+  // Cleared until every async step below finishes. The figure-capture script
+  // waits for data-ready="1" so Edge cannot screenshot a half-loaded page.
+  document.documentElement.removeAttribute("data-ready");
 
-renderChecklists();
+  const q = new URLSearchParams(location.search);
 
-/* ---------- the rest of the form ---------- */
-
-$("hazards").innerHTML = DOMAINS.map(([key, label]) => `
-  <div><label class="f">${label}</label>
-    <select id="h_${key}">
-      ${LEVELS.map((name, code) =>
-        `<option value="${code}">${code} &mdash; ${name}</option>`).join("")}
-    </select></div>`).join("");
-
-$("flags").innerHTML = FLAGS.map(([key, question, hint]) => `
-  <div class="check"><input type="checkbox" id="f_${key}">
-    <div>${esc(question)}${hint ? `<span class="hint">${esc(hint)}</span>` : ""}</div></div>`).join("");
-
-function loadEemRatings() {
-  const measure = EEMS.find(e => e.eem_id === Number($("eem").value));
-  if (!measure) return;
-  DOMAINS.forEach(([key], i) => { $("h_" + key).value = measure.hazard_list[i]; });
-  $("eemnote").innerHTML =
-    `${esc(measure.equipment)} &middot; ${esc(measure.stage)}<br>${esc(measure.note)}`;
-}
-
-fetch("/api/eems").then(r => r.json()).then(list => {
-  EEMS = list;
-  $("eem").innerHTML = list.map(m =>
-    `<option value="${m.eem_id}">${esc(m.label)}</option>`).join("");
-  loadEemRatings();
-});
-$("eem").onchange = loadEemRatings;
-
-/* ---------- submit ---------- */
-
-async function run() {
-  $("error").classList.add("hidden");
-  $("status").textContent = "Running Algorithm 1\u2026";
-
-  const readiness = {};
-  for (const key of Object.keys(state)) {
-    readiness[key] = state[key].map(item => ({
-      name: item.name.trim() || "(unnamed evidence item)",
-      score: item.score, mandatory: item.mandatory, threshold: item.threshold }));
+  if (q.get("capture") === "1") {
+    document.body.classList.add("capture");
+    $("capture").classList.add("on");
   }
 
-  const flags = {};
-  FLAGS.forEach(([key]) => { flags[key] = $("f_" + key).checked; });
+  try {
+    const ref = q.get("case");
+    if (ref && ref.includes("/")) {
+      const [caseId, runKey] = ref.split("/");
+      await loadCase(caseId, runKey);
+      if (q.get("run") === "1") await run();
+    }
 
-  const oppRaw = $("opp").value.trim();
+    // ?compare=routing/self pairs the run just made against the most recent stored
+    // run of another case study, which is how the comparison figure is reproduced.
+    const against = q.get("compare");
+    if (against && against.includes("/") && RESULT) {
+      const [caseId, runKey] = against.split("/");
+      await loadRuns();
+      const earlier = RUNLIST.find(r => r.case_id === caseId && r.case_run_key === runKey);
+      if (earlier) {
+        COMPARE.a = earlier.run_id;
+        COMPARE.b = RESULT.run_id;
+        LAYER = 4;
+        TAB = 1;
+        await doCompare();
+      }
+    }
+
+    const layer = Number(q.get("layer"));
+    if (layer >= 1 && layer <= 4) {
+      const target = LAYERS.find(l => l.id === layer);
+      if (target && !(target.needsRun && !RESULT)) {
+        LAYER = layer;
+        TAB = Math.min(
+          Math.max(Number(q.get("tab")) || 0, 0),
+          Math.max(target.tabs.length - 1, 0));
+        render();
+      }
+    }
+
+    const dim = q.get("dim");
+    if (dim && form.readiness[dim]) { EVDIM = dim; render(); }
+  } finally {
+    // Two frames so the last render paints before the capturer fires.
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    document.documentElement.setAttribute("data-ready", "1");
+  }
+}
+
+function applyEemRatings() {
+  const m = BOOT.eems.find(e => e.eem_id === Number(form.eem_id));
+  if (m) form.hazard = m.hazard_list.slice();
+}
+
+/* ---------------- input read-backs (counting only) ---------------- */
+
+function dimCount(key) {
+  const items = form.readiness[key] || [];
+  const applicable = items.filter(i => i.score !== null);
+  return {
+    applicable: applicable.length,
+    points: applicable.reduce((t, i) => t + i.score, 0),
+    denominator: 2 * applicable.length,
+  };
+}
+
+function gateItems() {
+  const rows = [];
+  const titles = {};
+  BOOT.readiness_checklist.forEach(d => { titles[d.key] = d.symbol + " " + d.title; });
+  for (const [key, items] of Object.entries(form.readiness)) {
+    items.forEach(i => {
+      if (!i.mandatory) return;
+      rows.push({
+        dimension: titles[key] || key, name: i.name,
+        score: i.score, threshold: i.threshold,
+        passed: i.score !== null && i.score >= i.threshold,
+      });
+    });
+  }
+  return rows;
+}
+
+/* ---------------- chrome ---------------- */
+
+function renderRail() {
+  $("layers").innerHTML = LAYERS.map(l => {
+    const locked = l.needsRun && !RESULT;
+    return `<div class="layer ${LAYER === l.id ? "active" : ""} ${locked ? "locked" : ""}"
+                 data-layer="${l.id}">
+      <div class="n">L${l.id}</div>
+      <div><div class="t">${esc(l.title)}</div>
+        <div class="d">${locked ? "Available once the assessment has been run" : esc(l.desc)}</div>
+      </div></div>`;
+  }).join("");
+
+  $("rail-foot").innerHTML = BOOT
+    ? `${BOOT.provenance.measures} measures in library<br>
+       framework ${esc(BOOT.provenance.framework_version)}<br>
+       sha256 ${esc(BOOT.provenance.framework_sha256.slice(0, 12))}`
+    : "";
+
+  $("layers").querySelectorAll(".layer").forEach(el => {
+    el.onclick = () => {
+      if (el.classList.contains("locked")) return;
+      LAYER = Number(el.dataset.layer);
+      TAB = 0;
+      render();
+    };
+  });
+}
+
+function renderStatusBar() {
+  const p = RESULT ? RESULT.provenance : null;
+  $("statusbar").innerHTML = [
+    `framework <b>${esc(BOOT.provenance.framework_version)}</b>`,
+    `readiness W <b>${esc(p ? p.readiness_weights : weightLabel("readiness", form.wmode))}</b>`,
+    `criticality Q <b>${esc(p ? p.criticality_weights : weightLabel("criticality", form.qmode))}</b>`,
+    p ? `run <b>${esc(RESULT.run_id)}</b>` : `run <b>\u2014</b>`,
+    p ? `input sha256 <b>${esc(p.input_sha256.slice(0, 12))}</b>` : `input sha256 <b>\u2014</b>`,
+    p ? `<b>${esc(p.timestamp_utc.replace("T", " ").slice(0, 19))} UTC</b>` : `<b>not run</b>`,
+  ].map(s => `<span>${s}</span>`).join('<span class="sep">|</span>');
+
+  $("tb-run").textContent = RESULT
+    ? `${RESULT.run_id}  \u00b7  ${RESULT.decision.disposition}`
+    : "no run yet";
+}
+
+function weightLabel(which, mode) {
+  return BOOT.weight_sets[which][mode];
+}
+
+function render() {
+  renderRail();
+  const layer = LAYERS.find(l => l.id === LAYER);
+  const eq = {
+    1: "Equations (1), (4), (7) inputs",
+    2: "Equations (2)\u2013(6), (8)\u2013(10)",
+    3: "Equation (7), Algorithm 1 steps 7\u20139",
+    4: "Appendix D record model",
+  }[LAYER];
+
+  $("tabs").innerHTML =
+    layer.tabs.map((t, i) =>
+      `<div class="tab ${TAB === i ? "active" : ""}" data-tab="${i}">${esc(t)}</div>`).join("")
+    + `<div class="eq">${esc(eq)}</div>`;
+
+  $("tabs").querySelectorAll(".tab").forEach(el => {
+    el.onclick = () => { TAB = Number(el.dataset.tab); render(); };
+  });
+
+  const body = {
+    1: [paneScope, paneEvidence, paneHazard, paneJudgement, paneConditions],
+    2: [paneAnalytics],
+    3: [paneDecision, paneGovernance],
+    4: [paneRecord, paneRuns, paneRepro],
+  }[LAYER][TAB];
+
+  $("pane").innerHTML = body();
+  wire();
+  renderStatus();
+  renderStatusBar();
+}
+
+/* =========================================================================
+   LAYER 1 - input and evidence
+   ========================================================================= */
+
+function paneScope() {
+  const m = BOOT.eems.find(e => e.eem_id === Number(form.eem_id));
+  return `
+  <div class="cols2">
+    <div>
+      <div class="panel"><div class="ph"><b>Assessment scope</b>
+        <span class="right">recorded verbatim in the assessment record</span></div>
+        <div class="pb">
+          <div class="field"><label class="f">Facility</label>
+            <input type="text" id="i-facility" value="${esc(form.facility)}"></div>
+          <div class="field"><label class="f">Assessor</label>
+            <input type="text" id="i-assessor" value="${esc(form.assessor)}"></div>
+          <div class="field" style="margin-bottom:6px"><label class="f">Energy-efficiency measure</label>
+            <select id="i-eem">${BOOT.eems.map(e =>
+              `<option value="${e.eem_id}" ${e.eem_id === Number(form.eem_id) ? "selected" : ""}
+                >${esc(e.label)}</option>`).join("")}</select></div>
+          ${m ? `<div class="note">
+            <b>${esc(m.equipment)}</b> &middot; ${esc(m.stage)} &middot; source ${esc(m.source_refs.join(", "))}<br>
+            ${esc(m.note)}<br>
+            Selecting a measure loads its Appendix B hazard coding into layer 1. Those ratings
+            are inputs and remain editable.</div>` : ""}
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="panel"><div class="ph"><b>Case studies</b>
+        <span class="eqref">inputs only</span>
+        <span class="right">no stored results</span></div>
+        <div class="pb" style="padding:0">
+          ${BOOT.case_studies.map(c => `
+            <div class="caserow">
+              <div class="cn">${c.number}</div>
+              <div><div class="ct">${esc(c.title)}</div>
+                <div class="cq">&ldquo;${esc(c.question)}&rdquo;</div></div>
+              <div class="cr">${c.runs.map(r => `
+                <div class="runpick">
+                  <span class="ex">${esc(r.run_key)}</span>
+                  <button class="mini" data-case="${esc(c.case_id)}" data-run="${esc(r.run_key)}"
+                    title="${esc(r.label)} \u2014 ${esc(r.note)}">Load inputs</button>
+                </div>`).join("")}</div>
+            </div>`).join("")}
+        </div>
+        <div class="evfoot">Loading a case study fills this form with stored input values.
+          The result is produced only when the assessment is run.</div>
+      </div>
+      ${form.case_id ? `<div class="note">Form currently holds the stored inputs for
+        case study <b>${esc(form.case_id)}</b> / <b>${esc(form.case_run_key)}</b>.
+        Editing any field detaches it.</div>` : ""}
+    </div>
+  </div>
+
+  <div class="panel"><div class="ph"><b>How the decision is reached</b>
+    <span class="eqref">Algorithm 1</span>
+    <span class="right">two phases, four possible dispositions</span></div>
+    <div class="pb"><div class="cols2">
+      <div>
+        <div style="font-size:11.5px;font-weight:600;margin-bottom:3px">
+          Phase 1 &mdash; can this be assessed at all?</div>
+        <div class="note">Every evidence item placed in the gate must reach its threshold.
+          If one does not, the answer is not an assessment mode. It is
+          <b>readiness improvement / hold</b>, and the work is to fix the prerequisite. A
+          facility that cannot support a defensible assessment has a readiness problem, which
+          is not by itself a reason to fly someone out.</div>
+      </div>
+      <div>
+        <div style="font-size:11.5px;font-weight:600;margin-bottom:3px">
+          Phase 2 &mdash; who should assess it?</div>
+        <div class="note">Reached only when the gate passes. Rules are tested in order:
+          a declared safety override or a direct-verification requirement selects
+          <b>on-site expert</b>; otherwise validated digital evidence needing specialist
+          reading selects <b>remote specialist</b>; otherwise adequate in-house capability
+          selects <b>self-assessment</b>. Anything unresolved escalates.</div>
+      </div>
+    </div></div>
+  </div>`;
+}
+
+function paneEvidence() {
+  const dims = BOOT.readiness_checklist;
+  const active = dims.find(d => d.key === EVDIM) || dims[0];
+  const items = form.readiness[active.key] || [];
+
+  const list = dims.map(d => {
+    const c = dimCount(d.key);
+    const mand = (form.readiness[d.key] || []).filter(i => i.mandatory);
+    const failed = mand.filter(i => !(i.score !== null && i.score >= i.threshold)).length;
+    const computed = RESULT
+      ? RESULT.analytics.readiness.vector.find(v => v.key === d.key)
+      : null;
+    return `<div class="dimrow ${d.key === active.key ? "active" : ""}" data-dim="${d.key}">
+      <div class="sym">${esc(d.symbol)}</div>
+      <div><div class="nm">${esc(d.title)}</div>
+        <div class="sub">${c.points} / ${c.denominator} points &middot; ${c.applicable} applicable${
+          computed ? ` &middot; S = ${n2(computed.value)}` : ""}</div></div>
+      <div class="gate" style="color:${mand.length === 0 ? "var(--faint)" :
+        failed ? "var(--red)" : "var(--green)"}">${
+        mand.length === 0 ? "" : failed ? failed + " UNMET" : "MET"}</div>
+    </div>`;
+  }).join("");
+
+  const rows = items.map((item, i) => {
+    const state = !item.mandatory ? ""
+      : (item.score !== null && item.score >= item.threshold) ? "gateok" : "gatefail";
+    return `<div class="ev ${item.mandatory ? "mand" : ""} ${state}">
+      <input class="nm" type="text" value="${esc(item.name)}" data-act="name" data-i="${i}">
+      <div class="chk"><input type="checkbox" ${item.mandatory ? "checked" : ""}
+        data-act="mand" data-i="${i}" title="Include in the non-compensatory gate"></div>
+      <select class="tau ${item.mandatory ? "" : "off"}" data-act="tau" data-i="${i}">
+        <option value="1" ${item.threshold === 1 ? "selected" : ""}>&tau; \u2265 1</option>
+        <option value="2" ${item.threshold === 2 ? "selected" : ""}>&tau; \u2265 2</option>
+      </select>
+      <div class="seg">${[0, 1, 2].map(v => `
+        <label><input type="radio" name="s${i}" value="${v}" data-act="score" data-i="${i}"
+          ${item.score === v ? "checked" : ""}>${v}</label>`).join("")}
+        <label><input type="radio" name="s${i}" value="na" data-act="score" data-i="${i}"
+          ${item.score === null ? "checked" : ""}>N/A</label>
+      </div>
+      <div class="del" data-act="del" data-i="${i}" title="Remove this item">&times;</div>
+    </div>`;
+  }).join("");
+
+  const c = dimCount(active.key);
+
+  return `
+  <h2 class="sec">Readiness evidence
+    <span>Appendix C checklist &middot; coded 0 absent, 1 partial or outdated, 2 current and
+    demonstrated, N/A removed from the denominator</span></h2>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:14px;align-items:start">
+    <div>
+      <div class="dimlist">${list}</div>
+      <div class="note" style="margin-top:8px">
+        Section 4.5 requires the assessment team to define its own item set and its own
+        mandatory subset, so any row can be renamed, removed or added, and any row can be
+        placed in the gate. The four rows marked required by default are the examples the
+        paper names. <b>The paper does not prescribe the acceptance thresholds &tau;.</b>
+      </div>
+      <div class="field" style="margin-top:10px"><label class="f">Readiness weight set W</label>
+        <select id="i-wmode">
+          <option value="bounded" ${form.wmode === "bounded" ? "selected" : ""}
+            >${esc(weightLabel("readiness", "bounded"))}, reports an interval</option>
+          <option value="equal" ${form.wmode === "equal" ? "selected" : ""}
+            >${esc(weightLabel("readiness", "equal"))}, reports a single value</option>
+        </select></div>
+    </div>
+    <div class="panel">
+      <div class="ph"><b>${esc(active.symbol)} ${esc(active.title)}</b>
+        <span class="eqref">Equation (4)</span>
+        <span class="right">${esc(active.question)}</span></div>
+      <div class="ev head">
+        <span>Evidence to verify</span><span style="text-align:center">gate</span>
+        <span>threshold</span><span style="text-align:center">rating</span><span></span>
+      </div>
+      ${rows}
+      <div class="evfoot">
+        <button class="mini" data-act="add">+ add evidence item</button>
+        <span>set every row</span>
+        ${["0", "1", "2", "N/A"].map(v =>
+          `<button class="mini" data-act="all" data-v="${v}">${v}</button>`).join("")}
+        <span style="margin-left:auto">entered ${c.points} of ${c.denominator} possible points
+          across ${c.applicable} applicable item${c.applicable === 1 ? "" : "s"}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:14px"><div class="ph">
+    <b>What counts as evidence for ${esc(active.symbol)} ${esc(active.title)}</b>
+    <span class="eqref">Appendix C, Table C1</span>
+    <span class="right">adaptation across organizations</span></div>
+    <div class="pb"><div class="cols2">
+      <div>
+        <label class="f">Evidence to verify, as listed in the paper</label>
+        <div class="note">${esc(active.evidence_source || "")}</div>
+        <div class="note" style="margin-top:7px">The rows above are editable handles for these
+          items. Renaming one changes the label recorded with the run, not the requirement.</div>
+      </div>
+      <div>
+        <label class="f">Adaptation across organizations</label>
+        <div class="note">${esc(active.adaptation || "")}</div>
+      </div>
+    </div>
+      <div class="note" style="margin-top:9px;padding-top:8px;border-top:1px solid var(--rule)">
+        A dimension is scored only against the items that apply to this facility. An item that
+        is genuinely not applicable is marked N/A and leaves the denominator rather than being
+        scored zero, because a requirement that does not exist here is a different thing from a
+        requirement that exists and is unmet. A dimension with no applicable items at all is
+        refused rather than scored.
+      </div>
+    </div>
+  </div>`;
+}
+
+function paneHazard() {
+  const sum = form.hazard.reduce((a, b) => a + b, 0);
+  const m = BOOT.eems.find(e => e.eem_id === Number(form.eem_id));
+  const published = m ? m.hazard_list : null;
+  const edited = published && published.some((v, i) => v !== form.hazard[i]);
+
+  return `
+  <h2 class="sec">Hazard-interaction ratings
+    <span>the six domains of Equation (1), coded 0 none, 1 low, 2 medium, 3 high</span></h2>
+  <div class="cols2">
+    <div class="panel"><div class="ph"><b>Domain ratings</b>
+      <span class="right">${edited ? "edited from the published coding" : "as published in Appendix B"}</span></div>
+      <div class="pb">
+        ${BOOT.hazard_domains.map((d, i) => `
+          <div class="field"><label class="f">${esc(d.abbr)} &middot; ${esc(d.title)}</label>
+            <select data-act="hz" data-i="${i}">
+              ${BOOT.hazard_levels.map((name, code) =>
+                `<option value="${code}" ${form.hazard[i] === code ? "selected" : ""}
+                  >${code} &mdash; ${esc(name)}</option>`).join("")}
+            </select></div>`).join("")}
+      </div>
+      <div class="evfoot">entered ratings sum to ${sum} of a possible 18</div>
+    </div>
+    <div>
+      <div class="note">
+        Ratings are pre-filled from the selected measure's published Appendix B coding and
+        remain editable. CRIS is computed from whatever is entered here.
+        <br><br>
+        The manuscript is explicit that CRIS is an interaction-breadth indicator and
+        <b>not</b> a risk estimate: it is not a probability, not a consequence, and not an
+        expected loss. The six-domain vector is the real output; CRIS is a sorting
+        convenience, because two measures can total the same while touching entirely
+        different hazards.
+        <br><br>
+        One limitation worth stating when this is presented: the scale accepts only 0 to 3,
+        so a domain that has <i>not yet been assessed</i> cannot be distinguished from one
+        assessed and rated none. Appendix D requires those to be different states, and this
+        form cannot yet express that.
+      </div>
+    </div>
+  </div>`;
+}
+
+function paneJudgement() {
+  return `
+  <h2 class="sec">Judgement inputs
+    <span>expert values supplied by the assessment team; the paper defines their meaning
+    and range but sets no scoring rubric</span></h2>
+  <div class="cols2">
+    <div class="panel"><div class="ph"><b>Criticality inputs</b>
+      <span class="eqref">Equation (9)</span></div>
+      <div class="pb">
+        <div class="field"><label class="f">D &middot; data and evidence sufficiency (0\u2013100)</label>
+          <input type="number" id="i-D" min="0" max="100" value="${form.D}">
+          <div class="note" style="margin-top:3px">Enters Equation (9) as the deficit
+            100 &minus; D = ${100 - Number(form.D)}.</div></div>
+        <div class="field"><label class="f">C &middot; action complexity (0\u2013100)</label>
+          <input type="number" id="i-C" min="0" max="100" value="${form.C}"></div>
+        <div class="field" style="margin-bottom:0"><label class="f">V &middot; direct-verification requirement (0\u2013100)</label>
+          <input type="number" id="i-V" min="0" max="100" value="${form.V}"></div>
+      </div>
+    </div>
+    <div class="panel"><div class="ph"><b>Opportunity inputs</b>
+      <span class="eqref">Equation (8)</span>
+      <span class="right">optional</span></div>
+      <div class="pb">
+        <div class="field"><label class="f">Normalized benefit scores z, comma separated</label>
+          <input type="text" id="i-opp" value="${esc(form.opportunity)}"
+            placeholder="e.g. 80, 75, 70">
+          <div class="note" style="margin-top:3px">Energy saving, economics, emissions,
+            strategic fit, or whatever the facility can defend. Left empty, no opportunity
+            interval is reported.</div></div>
+        <div class="field" style="margin-bottom:0"><label class="f">Criticality weight set Q</label>
+          <select id="i-qmode">
+            <option value="equal" ${form.qmode === "equal" ? "selected" : ""}
+              >${esc(weightLabel("criticality", "equal"))}</option>
+            <option value="bounded" ${form.qmode === "bounded" ? "selected" : ""}
+              >${esc(weightLabel("criticality", "bounded"))}</option>
+          </select></div>
+        <div class="note" style="margin-top:9px">
+          Opportunity Priority and Assessment Criticality are kept apart on purpose. A measure
+          can be highly attractive and highly demanding to assess at the same time; those are
+          not in tension, they call for different responses.
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function paneConditions() {
+  return `
+  <h2 class="sec">Verification conditions
+    <span>Table 4 &middot; these are the only inputs the mode-selection rules read</span></h2>
+  <div class="cols2">
+    <div class="panel"><div class="ph"><b>Conditions</b></div>
+      <div class="pb" style="padding:4px 0">
+        ${BOOT.conditions.map(c => `
+          <div style="display:flex;gap:9px;padding:7px 11px;border-bottom:1px solid var(--rule);
+                      align-items:flex-start">
+            <input type="checkbox" style="margin-top:2px;width:14px;height:14px;accent-color:var(--accent)"
+              data-act="flag" data-key="${esc(c.key)}" ${form.flags[c.key] ? "checked" : ""}>
+            <div><div style="font-size:11.5px">${esc(c.question)}</div>
+              ${c.note ? `<div class="note" style="margin-top:1px">${esc(c.note)}</div>` : ""}</div>
+          </div>`).join("")}
+      </div>
+    </div>
+    <div>
+      <div class="panel"><div class="ph"><b>Reviewer rationale</b>
+        <span class="right">recorded verbatim</span></div>
+        <div class="pb">
+          <textarea id="i-rationale" rows="4">${esc(form.rationale)}</textarea>
+        </div>
+      </div>
+      <div class="note">
+        Algorithm 1 selects a mode from the readiness gate and these seven conditions only.
+        No score enters the routing rules, which is what stops an attractive measure from
+        trading its business case against a verification requirement.
+        <br><br>
+        The tool recommends and explains. It does not authorise a process change.
+      </div>
+    </div>
+  </div>`;
+}
+
+/* =========================================================================
+   LAYER 2 - analytics and robustness
+   ========================================================================= */
+
+function intervalBlock(env, opts = {}) {
+  const { minimum, maximum, spread } = env;
+  const single = Math.abs(spread) < 1e-9;
+  const left = Math.max(0, Math.min(100, minimum));
+  const width = Math.max(0, Math.min(100, maximum) - left);
+  const labels = opts.labels || [];
+
+  return `
+  <div class="interval">
+    <div class="readout">${single ? n2(minimum) : `${n2(minimum)} \u2013 ${n2(maximum)}`}</div>
+    <div class="scale">
+      <div class="axis"></div>
+      ${single
+        ? `<div class="point" style="left:${left}%"></div>`
+        : `<div class="band ${width > 20 ? "wide" : ""}"
+              style="left:${left}%;width:${width}%"></div>`}
+    </div>
+    <div class="ticks"><span>0</span><span>50</span><span>100</span></div>
+    <dl class="kv" style="margin-top:8px">
+      <dt>weight set</dt><dd>${esc(env.label)}</dd>
+      <dt>interval width</dt><dd>${n2(spread)}</dd>
+      ${single ? "" : `
+        <dt>w at minimum</dt><dd class="wvec">${env.weights_at_minimum.map(w => w.toFixed(2)).join("  ")}</dd>
+        <dt>w at maximum</dt><dd class="wvec">${env.weights_at_maximum.map(w => w.toFixed(2)).join("  ")}</dd>`}
+    </dl>
+    ${labels.length ? `<div class="note" style="margin-top:6px">order: ${labels.join(", ")}</div>` : ""}
+  </div>`;
+}
+
+function paneAnalytics() {
+  const a = RESULT.analytics;
+  const r = a.readiness, h = a.hazard, o = a.opportunity, c = a.criticality;
+  const single = Math.abs(r.spread) < 1e-9;
+
+  return `
+  <div class="cols2">
+
+    <div class="panel"><div class="ph"><b>Readiness vector S and index RI</b>
+      <span class="eqref">Equations (4), (5)\u2013(6)</span></div>
+      <div class="pb">
+        ${r.vector.map(v => `
+          <div class="bar"><div class="lab"><em>${esc(v.symbol)}</em>${esc(v.title)}</div>
+            <div class="track"><i style="width:${v.value}%"></i></div>
+            <div class="v">${n2(v.value)}</div></div>`).join("")}
+        <div style="border-top:1px solid var(--rule);margin-top:9px;padding-top:7px">
+          ${intervalBlock(r)}
+        </div>
+        <div class="note" style="margin-top:7px">
+          ${single
+            ? `One admissible weight vector was declared, so RI is a point value.`
+            : `Rather than invent weights it cannot defend, the facility declares the set it can,
+               and the exact best and worst cases are found by linear programming. The interval
+               width, ${n2(r.spread)}, <b>is</b> the cost of not having elicited preferences:
+               the worst case loads the permitted maximum onto the weakest dimensions.`}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel"><div class="ph"><b>Interaction vector and CRIS</b>
+      <span class="eqref">Equations (1)\u2013(3)</span>
+      <span class="right">vector retained in full</span></div>
+      <div class="pb">
+        ${h.domains.map(d => `
+          <div class="bar"><div class="lab"><em>${esc(d.abbr)}</em>${esc(d.title)}</div>
+            <div class="track"><i class="l${d.code}" style="width:${d.code / 3 * 100}%"></i></div>
+            <div class="v">${esc(d.level)}</div></div>`).join("")}
+        <div style="border-top:1px solid var(--rule);margin-top:9px;padding-top:7px;
+                    display:flex;align-items:baseline;gap:16px">
+          <div><div class="readout num" style="font-size:24px">${h.cris}<span
+            style="font-size:14px;color:var(--faint)"> / ${h.cris_maximum}</span></div>
+            <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;
+                        color:var(--faint)">CRIS</div></div>
+          <div><div class="readout num" style="font-size:24px">${n2(h.interaction_R)}</div>
+            <div style="font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;
+                        color:var(--faint)">interaction R</div></div>
+          <div class="note" style="flex:1">
+            ${h.domains.filter(d => d.code === 3).length} of 6 domains rated high.
+            CRIS is an interaction-breadth indicator, not a probability, a consequence or an
+            expected loss.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel"><div class="ph"><b>Opportunity Priority OP</b>
+      <span class="eqref">Equation (8)</span>
+      <span class="right">how valuable the measure is</span></div>
+      <div class="pb">
+        ${o ? intervalBlock(o) + `
+          <dl class="kv" style="margin-top:2px">
+            <dt>benefit scores z</dt><dd>${o.scores.map(s => Number(s).toFixed(0)).join("  ")}</dd>
+          </dl>`
+          : `<div class="pending">No benefit scores were entered, so no opportunity interval is
+             reported. The framework leaves this out rather than substituting a default.</div>`}
+      </div>
+    </div>
+
+    <div class="panel"><div class="ph"><b>Assessment Criticality AC</b>
+      <span class="eqref">Equations (9)\u2013(10)</span>
+      <span class="right">how demanding the assessment is</span></div>
+      <div class="pb">
+        ${intervalBlock(c)}
+        <table class="grid" style="margin-top:7px">
+          <tr><th colspan="2">Component</th><th class="r">Value</th><th>Entered as</th></tr>
+          ${c.components.map(k => `<tr>
+            <td class="num" style="width:42px;white-space:nowrap;color:var(--faint)"
+              >${k.symbol}</td>
+            <td>${esc(k.label)}</td>
+            <td class="r num">${n2(k.value)}</td>
+            <td style="color:var(--muted)">${esc(k.source)}</td></tr>`).join("")}
+        </table>
+      </div>
+    </div>
+
+  </div>
+  <div class="note">
+    Opportunity and criticality are kept apart on purpose. A measure can be both highly
+    attractive and highly demanding to assess, and collapsing them into one weighted priority
+    number would let a large saving numerically cancel a missing-data problem or a
+    safety-critical interaction. Neither figure is read by the routing rules in layer 3.
+  </div>`;
+}
+
+/* =========================================================================
+   LAYER 3 - decision and governance
+   ========================================================================= */
+
+function dispositionBlock() {
+  const d = RESULT.decision;
+  const cls = DISP_CLASS[d.disposition] || "hold";
+  const hold = d.disposition.startsWith("READINESS");
+  return `
+  <div class="disp disp-${cls}">
+    <div class="l">${hold ? "Phase 1 disposition \u00b7 gate not satisfied"
+      : d.override ? "Phase 2 assessment mode \u00b7 override applied"
+      : "Phase 2 assessment mode"}</div>
+    <div class="m">${esc(d.disposition)}</div>
+    <div class="r">${esc(d.rationale)}</div>
+  </div>`;
+}
+
+function paneDecision() {
+  const d = RESULT.decision;
+  const a = RESULT.analytics;
+  const hold = d.disposition.startsWith("READINESS");
+  const gateRows = d.gate.items;
+  const failed = gateRows.filter(r => !r.passed);
+  const struck = d.override || hold;
+
+  return `
+  ${dispositionBlock()}
+  <div class="actions"><span class="k">Next actions</span>
+    <span>${esc(d.next_actions.join("  \u00b7  ")) || "None recorded."}</span></div>
+  <div class="cols2">
+
+    <div class="panel"><div class="ph"><b>Readiness gate G</b>
+      <span class="eqref">Equation (7)</span>
+      <span class="right">G = ${d.gate.passed ? 1 : 0} \u00b7 ${failed.length
+        ? `${failed.length} item${failed.length === 1 ? "" : "s"} below threshold`
+        : "all mandatory items met"}</span></div>
+      <div class="pb" style="padding:0">
+        <table class="grid">
+          <tr><th>Mandatory evidence item</th><th class="r">Score</th>
+            <th class="r">&tau;</th><th class="r">Result</th></tr>
+          ${gateRows.map(r => `<tr class="${r.passed ? "" : "flagged"}">
+            <td>${esc(r.name)}<br><span style="color:var(--faint);font-size:10.5px"
+              >${esc(r.dimension)}</span></td>
+            <td class="r num">${r.score === null ? "N/A" : r.score}</td>
+            <td class="r num">${r.threshold}</td>
+            <td class="r" style="font-weight:700;color:${r.passed ? "var(--green)" : "var(--red)"}">
+              ${r.passed ? "met" : "unmet"}</td></tr>`).join("")}
+        </table>
+      </div>
+      <div class="evfoot">G = 1 only if every mandatory item meets its threshold. No score
+        elsewhere can compensate for one that does not.</div>
+    </div>
+
+    <div class="panel"><div class="ph"><b>Scores at the moment of the decision</b>
+      <span class="right">${hold ? "computed, not consulted"
+        : d.override ? "computed, not decisive" : "computed"}</span></div>
+      <div class="pb">
+        <dl class="kv" style="font-size:12px;gap:6px 12px">
+          <dt>Readiness RI</dt>
+            <dd class="${hold ? "struck" : ""}">${n2(a.readiness.minimum)}${
+              Math.abs(a.readiness.spread) < 1e-9 ? "" : " \u2013 " + n2(a.readiness.maximum)}</dd>
+          <dt>Interaction CRIS</dt><dd>${a.hazard.cris} / 18, R = ${n2(a.hazard.interaction_R)}</dd>
+          <dt>Opportunity OP</dt>
+            <dd class="${struck ? "struck" : ""}">${a.opportunity
+              ? n2(a.opportunity.minimum) + (Math.abs(a.opportunity.spread) < 1e-9 ? ""
+                : " \u2013 " + n2(a.opportunity.maximum))
+              : "not reported"}</dd>
+          <dt>Criticality AC</dt>
+            <dd class="${struck ? "struck" : ""}">${n2(a.criticality.minimum)}${
+              Math.abs(a.criticality.spread) < 1e-9 ? "" : " \u2013 " + n2(a.criticality.maximum)}</dd>
+        </dl>
+        <div class="note" style="margin-top:9px">
+          ${hold
+            ? `The gate failed, so Phase 2 was never entered and none of these figures was
+               consulted. Readiness aggregated to a respectable interval and it made no
+               difference: a favourable aggregate cannot substitute for a prerequisite that is
+               absent. This is a readiness problem, not a reason to send an expert.`
+            : d.override
+            ? `Opportunity and criticality were computed, reported, and then not used. The rule
+               that applied reads a verification condition, not a score, so a strong business
+               case cannot be traded against a requirement to verify something directly.`
+            : `Mode selection reads the gate and the seven verification conditions. None of
+               these figures enters a routing rule; they inform planning and prioritisation.`}
+        </div>
+        <div class="chips" style="margin-top:10px">
+          ${d.conditions.map(c => `<span class="chip ${c.value ? "on" : ""}">
+            <span class="dot"></span>${esc(c.short)}</span>`).join("")}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="panel"><div class="ph"><b>Rule sequence</b>
+    <span class="eqref">Algorithm 1, steps 7\u20139</span>
+    <span class="right">tested in order, first match decides &middot; applied:
+      <b>${esc(d.rule_applied)}</b></span></div>
+    <div class="pb" style="padding:0">
+      <div class="rule" style="background:#fafcfc;border-bottom:1px solid var(--line);
+        font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+        color:var(--faint)">
+        <span>phase</span><span>rule and condition</span><span>would select</span>
+        <span class="st">result</span>
+      </div>
+      ${d.trace.map(r => `
+        <div class="rule ${r.fired ? "applied" : ""} ${
+          r.status === "not reached" ? "notreached" : ""}">
+          <div class="ph">${esc(r.phase)}</div>
+          <div><div class="lb">${esc(r.label)}</div>
+            <div class="cond">${esc(r.condition)}</div></div>
+          <div class="md">${esc(r.mode)}</div>
+          <div class="st">${esc(r.status)}</div>
+        </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function paneGovernance() {
+  const d = RESULT.decision;
+  const p = RESULT.provenance;
+  return `
+  <h2 class="sec">Governance record <span>who decided, on what basis, and what was declared</span></h2>
+  <div class="cols2">
+    <div class="panel"><div class="ph"><b>Accountability</b></div>
+      <div class="pb"><dl class="kv" style="gap:5px 12px">
+        <dt>facility</dt><dd>${esc(RESULT.record.metadata.facility || "\u2014")}</dd>
+        <dt>assessor</dt><dd>${esc(RESULT.record.metadata.assessor || "\u2014")}</dd>
+        <dt>measure</dt><dd>${esc(RESULT.record.eem_id)}</dd>
+        <dt>disposition</dt><dd>${esc(d.disposition)}</dd>
+        <dt>rule applied</dt><dd>${esc(d.rule_applied)}</dd>
+        <dt>override</dt><dd>${d.override ? "yes" : "no"}</dd>
+        <dt>routing used scores</dt><dd>${d.scores_used_for_routing ? "yes" : "no"}</dd>
+      </dl></div>
+    </div>
+    <div class="panel"><div class="ph"><b>Declared reasoning</b>
+      <span class="right">recorded verbatim</span></div>
+      <div class="pb">
+        <div style="font-size:11.5px;line-height:1.55">${esc(RESULT.record.rationale)}</div>
+      </div>
+    </div>
+  </div>
+  <div class="panel"><div class="ph"><b>Reproducibility</b>
+    <span class="right">Appendix D</span></div>
+    <div class="pb"><dl class="kv" style="gap:5px 12px">
+      <dt>run identifier</dt><dd>${esc(RESULT.run_id)}</dd>
+      <dt>recorded at</dt><dd>${esc(p.timestamp_utc)}</dd>
+      <dt>framework version</dt><dd>${esc(p.framework_version)}</dd>
+      <dt>framework sha256</dt><dd>${esc(p.framework_sha256)}</dd>
+      <dt>input sha256</dt><dd>${esc(p.input_sha256)}</dd>
+      <dt>readiness weight set</dt><dd>${esc(p.readiness_weights)}</dd>
+      <dt>criticality weight set</dt><dd>${esc(p.criticality_weights)}</dd>
+    </dl>
+    <div class="note" style="margin-top:9px">
+      The record is written once and never amended. Re-running with different weights creates a
+      new record and leaves the original intact, so a recommendation can be reconstructed from
+      its evidence later and two versions can be compared rather than one overwriting the
+      other. The framework digest is the hash of the reference implementation as shipped,
+      which is what shows the published algorithm was the one that ran.
+    </div></div>
+  </div>`;
+}
+
+/* =========================================================================
+   LAYER 4 - output and learning
+   ========================================================================= */
+
+function paneRecord() {
+  if (!RESULT) return emptyRun("The assessment record is written when the assessment is run.");
+  const r = RESULT.record;
+  const d = RESULT.decision;
+  return `
+  ${dispositionBlock()}
+  <div class="cols2">
+    <div class="panel"><div class="ph"><b>Assessment record</b>
+      <span class="eqref">${esc(RESULT.run_id)}</span></div>
+      <div class="pb"><dl class="kv" style="gap:5px 12px">
+        <dt>measure</dt><dd>${esc(r.eem_id)}</dd>
+        <dt>gate G</dt><dd>${r.readiness_gate ? 1 : 0}</dd>
+        <dt>readiness RI</dt><dd>${r.readiness_interval
+          ? n2(r.readiness_interval[0]) + " \u2013 " + n2(r.readiness_interval[1]) : "\u2014"}</dd>
+        <dt>CRIS</dt><dd>${r.cris} / 18</dd>
+        <dt>interaction R</dt><dd>${n2(r.normalized_interaction)}</dd>
+        <dt>opportunity OP</dt><dd>${r.opportunity_interval
+          ? n2(r.opportunity_interval[0]) + " \u2013 " + n2(r.opportunity_interval[1])
+          : "not reported"}</dd>
+        <dt>criticality AC</dt><dd>${n2(r.assessment_criticality_interval[0])} \u2013
+          ${n2(r.assessment_criticality_interval[1])}</dd>
+        <dt>disposition</dt><dd>${esc(r.selected_mode)}</dd>
+        <dt>override</dt><dd>${r.override_triggered ? "yes" : "no"}</dd>
+      </dl></div>
+      <div class="evfoot">
+        <button class="mini" id="dl">Download record as JSON</button>
+        <span style="margin-left:auto">written once; never amended</span>
+      </div>
+    </div>
+    <div>
+      <div class="panel"><div class="ph"><b>Action register</b></div>
+        <div class="pb"><ul style="margin:0;padding-left:17px;font-size:11.5px;line-height:1.6">
+          ${d.next_actions.map(x => `<li>${esc(x)}</li>`).join("") || "<li>None recorded.</li>"}
+        </ul></div>
+      </div>
+      <details class="raw"><summary>View record source</summary>
+        <pre class="raw">${esc(JSON.stringify(RESULT.record, null, 2))}</pre>
+      </details>
+    </div>
+  </div>`;
+}
+
+function paneRuns() {
+  const cmp = COMPARE.data;
+  return `
+  <h2 class="sec">Runs and comparison
+    <span>Appendix D specifies a versioned record model so that changes are compared rather
+    than overwritten</span></h2>
+  <div style="display:grid;grid-template-columns:352px 1fr;gap:14px;align-items:start">
+    <div class="panel"><div class="ph"><b>Stored runs</b>
+      <span class="right">pick two to compare</span></div>
+      <div class="pb" style="padding:0;max-height:322px;overflow:auto">
+        <table class="grid fixed">
+          <tr><th style="width:26px"></th><th style="width:74px">Run</th>
+            <th>Measure</th><th style="width:104px">Mode</th></tr>
+          ${RUNLIST.length ? RUNLIST.map(r => `<tr>
+            <td><input type="checkbox" data-act="pick" data-run="${esc(r.run_id)}"
+              ${COMPARE.a === r.run_id || COMPARE.b === r.run_id ? "checked" : ""}></td>
+            <td class="num" style="white-space:nowrap">${esc(r.run_id)}</td>
+            <td class="clip" style="color:var(--muted)" title="${esc(r.eem_label)}"
+              >${esc(r.eem_label)}</td>
+            <td style="font-weight:600;font-size:10.5px;line-height:1.3"
+              >${esc(r.selected_mode)}</td></tr>`).join("")
+            : `<tr class="dim"><td colspan="4" style="padding:12px">No runs stored yet.</td></tr>`}
+        </table>
+      </div>
+      <div class="evfoot">
+        <button class="mini" id="refresh-runs">Refresh</button>
+        <button class="mini" id="do-compare" ${COMPARE.a && COMPARE.b ? "" : "disabled"}>Compare selected</button>
+        <span style="margin-left:auto">${COMPARE.a || "\u2014"} &nbsp;/&nbsp; ${COMPARE.b || "\u2014"}</span>
+      </div>
+    </div>
+    <div class="panel"><div class="ph"><b>Comparison</b>
+      ${cmp ? `<span class="right">${cmp.identical_inputs ? "inputs identical"
+        : `${cmp.differences.length} field${cmp.differences.length === 1 ? "" : "s"} differ, ${
+           cmp.routing_differences.length} read by the routing rules`}</span>` : ""}</div>
+      <div class="pb">
+        ${!cmp ? `<div class="pending">Select two runs and compare them.</div>` : `
+        <table class="grid">
+          <tr><th></th><th>${esc(cmp.a.run_id)}</th><th>${esc(cmp.b.run_id)}</th></tr>
+          <tr><td style="color:var(--muted)">disposition</td>
+            <td style="font-weight:700">${esc(cmp.a.selected_mode)}</td>
+            <td style="font-weight:700">${esc(cmp.b.selected_mode)}</td></tr>
+          <tr><td style="color:var(--muted)">gate G</td>
+            <td class="num">${cmp.a.gate_passed ? 1 : 0}</td>
+            <td class="num">${cmp.b.gate_passed ? 1 : 0}</td></tr>
+          <tr><td style="color:var(--muted)">CRIS</td>
+            <td class="num">${cmp.a.record.cris}</td><td class="num">${cmp.b.record.cris}</td></tr>
+          <tr><td style="color:var(--muted)">criticality AC</td>
+            <td class="num">${n2(cmp.a.record.assessment_criticality_interval[0])}</td>
+            <td class="num">${n2(cmp.b.record.assessment_criticality_interval[0])}</td></tr>
+          <tr><td style="color:var(--muted)">input sha256</td>
+            <td class="num" style="font-size:10px">${esc(cmp.a.input_sha256.slice(0, 12))}</td>
+            <td class="num" style="font-size:10px">${esc(cmp.b.input_sha256.slice(0, 12))}</td></tr>
+        </table>
+        <h2 class="sec" style="margin:13px 0 6px">Inputs that differ
+          <span>read by the routing rules, or reported only</span></h2>
+        <table class="grid fixed">
+          <tr><th style="width:34%">Field</th><th>${esc(cmp.a.run_id)}</th>
+            <th>${esc(cmp.b.run_id)}</th></tr>
+          ${cmp.differences.length ? cmp.differences.map(x => `<tr class="${
+            x.affects_routing ? "flagged" : "dim"}">
+            <td>${esc(x.field)}${x.affects_routing
+              ? `<br><b style="color:var(--red);font-size:9.5px;text-transform:uppercase;
+                   letter-spacing:.06em">read by the routing rules</b>` : ""}</td>
+            <td class="clip num" title="${esc(String(x.a))}">${esc(shortValue(x.a))}</td>
+            <td class="clip num" title="${esc(String(x.b))}">${esc(shortValue(x.b))}</td></tr>`).join("")
+            : `<tr class="dim"><td colspan="3">No input differs. Identical inputs produced
+                 ${cmp.same_disposition ? "the same" : "a different"} disposition.</td></tr>`}
+        </table>
+        ${cmp.routing_differences.length === 1 && !cmp.same_disposition ? `
+          <div class="note" style="margin-top:9px">
+            <b>Exactly one input that the routing rules read differs between these two
+            runs</b>, and the disposition changed with it. The readiness evidence, the hazard
+            ratings and the criticality inputs are identical.
+            ${cmp.differences.length > 1 ? `The other ${cmp.differences.length - 1}
+              differing field${cmp.differences.length === 2 ? " is" : "s are"} recorded with
+              the run but never read by Algorithm 1.` : ""}
+          </div>` : ""}`}
+      </div>
+    </div>
+  </div>
+  <div class="panel"><div class="ph"><b>Why runs are compared rather than amended</b>
+    <span class="eqref">Appendix D</span></div>
+    <div class="pb"><div class="cols2">
+      <div class="note">
+        Each run is written once, under its own identifier, with a digest of the inputs that
+        produced it and a digest of the reference implementation that ran. Re-running with a
+        different weight set, a corrected evidence score or a revised condition creates a new
+        record and leaves the original intact, so a recommendation can be reconstructed from
+        the evidence it was actually based on, however long afterwards.
+      </div>
+      <div class="note">
+        The practical value is visible above. Because the inputs are addressable, two runs can
+        be set beside each other and the field responsible for a change in disposition named
+        exactly, rather than inferred. A reviewer who doubts a recommendation does not have to
+        take the route on trust: they can find the input that produced it, change that input,
+        and watch what the framework does.
+      </div>
+    </div></div>
+  </div>`;
+}
+
+function paneRepro() {
+  if (!REPRO) { loadRepro(); return `<div class="pending">Checking the manuscript's values\u2026</div>`; }
+  return `
+  <h2 class="sec">Manuscript reproduction
+    <span>every value the paper states, against what the framework returns now</span></h2>
+  <div class="panel"><div class="ph"><b>Result</b>
+    <span class="right">recomputed on request, nothing cached</span></div>
+    <div class="pb">
+      <div class="badge ${REPRO.all_passed ? "" : "bad"}">
+        <span class="n">${REPRO.passed} / ${REPRO.total}</span>
+        <span class="t">${REPRO.all_passed
+          ? "stated values reproduced" : "checks disagree with the manuscript"}</span>
+      </div>
+      <table class="grid" style="margin-top:11px">
+        <tr><th>Section</th><th>Quantity</th><th class="r">Framework</th>
+          <th class="r">Manuscript</th><th class="r"></th></tr>
+        ${REPRO.checks.map(c => `<tr class="${c.passed ? "" : "flagged"}">
+          <td class="num" style="color:var(--muted)">${esc(c.section)}</td>
+          <td>${esc(c.quantity)}</td>
+          <td class="r num">${esc(JSON.stringify(c.got))}</td>
+          <td class="r num" style="color:var(--muted)">${esc(JSON.stringify(c.expected))}</td>
+          <td class="r" style="font-weight:700;color:${c.passed ? "var(--green)" : "var(--red)"}">
+            ${c.passed ? "ok" : "differs"}</td></tr>`).join("")}
+      </table>
+    </div>
+  </div>
+  <div class="note">
+    These are not stored answers. Each row calls the reference implementation and compares what
+    it returns with the figure printed in the manuscript, including recomputing all 65 CRIS
+    values from the Appendix B codes rather than reading the stored totals.
+  </div>`;
+}
+
+function emptyRun(message) {
+  return `<div class="panel"><div class="pb"><div class="pending">${esc(message)}</div></div></div>`;
+}
+
+/* =========================================================================
+   status column
+   ========================================================================= */
+
+function renderStatus() {
+  const gate = gateItems();
+  const failed = gate.filter(g => !g.passed);
+  const d = RESULT ? RESULT.decision : null;
+  const a = RESULT ? RESULT.analytics : null;
+  const hazSum = form.hazard.reduce((x, y) => x + y, 0);
+
+  $("status-body").innerHTML = `
+  <div class="sc">
+    <div class="sh">Disposition</div>
+    ${d ? `<div class="minidisp disp-${DISP_CLASS[d.disposition] || "hold"}">
+        <div class="l">${d.disposition.startsWith("READINESS") ? "Phase 1" : "Phase 2"}</div>
+        <div class="m">${esc(d.disposition)}</div></div>`
+      : `<div class="pending">Not yet run.</div>`}
+  </div>
+
+  <div class="sc">
+    <div class="sh">Gate G &middot; Equation (7)</div>
+    ${gate.map(g => `<div class="gitem ${g.passed ? "ok" : "no"}">
+      <span class="mk">${g.passed ? "\u2713" : "\u2715"}</span>
+      <span class="gn">${esc(g.name)}</span>
+      <span class="gv">${g.score === null ? "N/A" : g.score}/${g.threshold}</span>
+    </div>`).join("")}
+    <div class="msg">${failed.length
+      ? `<b style="color:var(--red)">${failed.length} mandatory item${failed.length === 1 ? "" : "s"}
+         below threshold.</b> No score can compensate for this.`
+      : `All ${gate.length} mandatory items meet their thresholds.`}</div>
+  </div>
+
+  <div class="sc">
+    <div class="sh">Readiness S ${RESULT ? "&middot; computed" : "&middot; entered points"}</div>
+    ${BOOT.readiness_checklist.map(dim => {
+      const c = dimCount(dim.key);
+      const v = RESULT ? a.readiness.vector.find(x => x.key === dim.key).value : null;
+      const pct = RESULT ? v : (c.denominator ? 100 * c.points / c.denominator : 0);
+      return `<div class="sbar"><span class="sy">${esc(dim.symbol)}</span>
+        <span class="tr"><i style="width:${pct}%"></i></span>
+        <span class="vv">${RESULT ? n2(v) : c.points + "/" + c.denominator}</span></div>`;
+    }).join("")}
+    ${RESULT && a.readiness ? `<div class="msg">RI ${n2(a.readiness.minimum)}${
+      Math.abs(a.readiness.spread) < 1e-9 ? "" : " \u2013 " + n2(a.readiness.maximum)}</div>`
+      : `<div class="msg">Points entered so far. S is computed by Equation (4) when the
+         assessment is run.</div>`}
+  </div>
+
+  <div class="sc">
+    <div class="sh">Hazard interaction</div>
+    <div style="display:flex;gap:3px;margin-bottom:6px">
+      ${form.hazard.map((code, i) => `
+        <div style="flex:1;text-align:center" title="${esc(BOOT.hazard_domains[i].title)}">
+          <div style="height:26px;display:flex;align-items:flex-end;background:#e6ebee">
+            <div class="l${code}" style="width:100%;height:${(code / 3 * 100) || 4}%"></div></div>
+          <div class="num" style="font-size:9px;color:var(--faint);margin-top:2px">
+            ${esc(BOOT.hazard_domains[i].abbr)}</div></div>`).join("")}
+    </div>
+    <div class="msg">${RESULT
+      ? `CRIS ${a.hazard.cris} / 18 &middot; R ${n2(a.hazard.interaction_R)}`
+      : `entered ratings sum to ${hazSum} of 18`}</div>
+  </div>
+
+  ${RESULT ? `<div class="sc">
+    <div class="sh">Scores</div>
+    <dl class="kv" style="font-size:10.5px;gap:3px 9px">
+      <dt>OP</dt><dd>${a.opportunity ? n2(a.opportunity.minimum) : "not reported"}</dd>
+      <dt>AC</dt><dd>${n2(a.criticality.minimum)}</dd>
+    </dl>
+    <div class="msg">Reported for planning. No routing rule reads them.</div>
+  </div>` : ""}`;
+}
+
+/* =========================================================================
+   events
+   ========================================================================= */
+
+function detach() { form.case_id = null; form.case_run_key = null; }
+
+function wire() {
+  const pane = $("pane");
+
+  const bind = (id, key, cast = v => v) => {
+    const el = $(id);
+    if (!el) return;
+    el.oninput = () => { form[key] = cast(el.value); detach(); };
+  };
+
+  bind("i-facility", "facility");
+  bind("i-assessor", "assessor");
+  bind("i-rationale", "rationale");
+  bind("i-opp", "opportunity");
+  bind("i-D", "D", Number);
+  bind("i-C", "C", Number);
+  bind("i-V", "V", Number);
+
+  if ($("i-eem")) $("i-eem").onchange = () => {
+    form.eem_id = Number($("i-eem").value);
+    applyEemRatings();
+    detach();
+    render();
+  };
+  if ($("i-wmode")) $("i-wmode").onchange = () => {
+    form.wmode = $("i-wmode").value; detach(); renderStatusBar();
+  };
+  if ($("i-qmode")) $("i-qmode").onchange = () => {
+    form.qmode = $("i-qmode").value; detach(); renderStatusBar();
+  };
+
+  pane.oninput = event => {
+    const t = event.target, act = t.dataset.act;
+    if (!act) return;
+
+    if (act === "hz") { form.hazard[Number(t.dataset.i)] = Number(t.value); detach(); render(); return; }
+    if (act === "flag") { form.flags[t.dataset.key] = t.checked; detach(); renderStatus(); return; }
+
+    const items = form.readiness[EVDIM];
+    const item = items[Number(t.dataset.i)];
+    if (!item) return;
+
+    if (act === "name") { item.name = t.value; detach(); return; }  // no re-render: keeps focus
+    if (act === "score") { item.score = t.value === "na" ? null : Number(t.value); }
+    if (act === "mand") { item.mandatory = t.checked; }
+    if (act === "tau") { item.threshold = Number(t.value); }
+    detach();
+    render();
+  };
+
+  pane.onclick = async event => {
+    const t = event.target.closest("[data-act], [data-dim], [data-case], #dl, #refresh-runs, #do-compare");
+    if (!t) return;
+
+    if (t.dataset.case) { await loadCase(t.dataset.case, t.dataset.run); return; }
+    if (t.dataset.dim) { EVDIM = t.dataset.dim; render(); return; }
+
+    if (t.id === "dl") {
+      window.location.href = `/api/runs/${RESULT.run_id}/export`;
+      return;
+    }
+    if (t.id === "refresh-runs") { await loadRuns(); render(); return; }
+    if (t.id === "do-compare") { await doCompare(); return; }
+
+    const act = t.dataset.act;
+    if (act === "pick") {
+      const id = t.dataset.run;
+      if (COMPARE.a === id) COMPARE.a = null;
+      else if (COMPARE.b === id) COMPARE.b = null;
+      else if (!COMPARE.a) COMPARE.a = id;
+      else if (!COMPARE.b) COMPARE.b = id;
+      else { COMPARE.a = COMPARE.b; COMPARE.b = id; }
+      render();
+      return;
+    }
+    if (act === "add") {
+      form.readiness[EVDIM].push({ name: "", score: 0, mandatory: false, threshold: 2 });
+      detach(); render(); return;
+    }
+    if (act === "del") {
+      form.readiness[EVDIM].splice(Number(t.dataset.i), 1);
+      detach(); render(); return;
+    }
+    if (act === "all") {
+      const value = t.dataset.v === "N/A" ? null : Number(t.dataset.v);
+      form.readiness[EVDIM].forEach(i => { i.score = value; });
+      detach(); render(); return;
+    }
+  };
+}
+
+$("capture").onclick = () => {
+  document.body.classList.toggle("capture");
+  $("capture").classList.toggle("on");
+};
+
+/* =========================================================================
+   server calls
+   ========================================================================= */
+
+async function loadCase(caseId, runKey) {
+  const data = await (await fetch(`/api/cases/${caseId}/runs/${runKey}/inputs`)).json();
+  const i = data.inputs;
+
+  form.facility = i.facility;
+  form.assessor = i.assessor;
+  form.eem_id = i.eem_id;
+  form.readiness = structuredClone(i.readiness);
+  form.hazard = i.hazard_vector.slice();
+  form.D = i.data_sufficiency_D;
+  form.C = i.action_complexity_C;
+  form.V = i.verification_need_V;
+  form.opportunity = (i.opportunity_scores || []).join(", ");
+  form.wmode = i.readiness_weight_mode;
+  form.qmode = i.criticality_weight_mode;
+  form.flags = { ...i.flags };
+  form.rationale = i.rationale;
+  form.case_id = caseId;
+  form.case_run_key = runKey;
+
+  RESULT = null;
+  LAYER = 1;
+  TAB = 0;
+  EVDIM = "data_availability";
+  $("run-msg").innerHTML =
+    `Loaded <b>${esc(data.case_title)}</b> \u2014 ${esc(data.label)}. Inputs only;
+     run to produce the result.`;
+  render();
+}
+
+async function loadRuns() {
+  RUNLIST = await (await fetch("/api/runs?limit=40")).json();
+}
+
+async function loadRepro() {
+  REPRO = await (await fetch("/api/reproduction")).json();
+  if (LAYER === 4 && TAB === 2) render();
+}
+
+async function doCompare() {
+  const url = `/api/compare?a=${encodeURIComponent(COMPARE.a)}&b=${encodeURIComponent(COMPARE.b)}`;
+  const response = await fetch(url);
+  COMPARE.data = response.ok ? await response.json() : null;
+  render();
+}
+
+async function run() {
+  const button = $("run");
+  button.disabled = true;
+  $("run-msg").textContent = "Running Algorithm 1\u2026";
+
   let opportunity = null;
-  if (oppRaw) {
-    opportunity = oppRaw.split(",").map(v => Number(v.trim()));
+  const raw = String(form.opportunity).trim();
+  if (raw) {
+    opportunity = raw.split(",").map(v => Number(v.trim()));
     if (opportunity.some(Number.isNaN)) {
-      fail("Opportunity scores must be numbers separated by commas."); return;
+      button.disabled = false;
+      $("run-msg").innerHTML =
+        `<b style="color:var(--red)">Benefit scores must be numbers separated by commas.</b>`;
+      return;
     }
   }
 
-  const selected = EEMS.find(e => e.eem_id === Number($("eem").value));
   const payload = {
-    facility: $("facility").value, assessor: $("assessor").value,
-    eem_label: selected ? selected.label : "",
-    readiness,
-    hazard_vector: DOMAINS.map(([key]) => Number($("h_" + key).value)),
-    data_sufficiency_D: Number($("D").value),
-    action_complexity_C: Number($("C").value),
-    verification_need_V: Number($("V").value),
+    facility: form.facility,
+    assessor: form.assessor,
+    eem_id: Number(form.eem_id),
+    readiness: Object.fromEntries(Object.entries(form.readiness).map(([k, items]) =>
+      [k, items.map(i => ({
+        name: i.name.trim() || "(unnamed evidence item)",
+        score: i.score, mandatory: i.mandatory, threshold: i.threshold,
+      }))])),
+    hazard_vector: form.hazard,
+    data_sufficiency_D: Number(form.D),
+    action_complexity_C: Number(form.C),
+    verification_need_V: Number(form.V),
     opportunity_scores: opportunity,
-    readiness_weight_mode: $("wmode").value,
-    criticality_weight_mode: $("qmode").value,
-    flags, rationale: $("rationale").value };
+    readiness_weight_mode: form.wmode,
+    criticality_weight_mode: form.qmode,
+    flags: form.flags,
+    rationale: form.rationale,
+    case_id: form.case_id,
+    case_run_key: form.case_run_key,
+  };
 
-  const response = await fetch("/api/assess", { method: "POST",
-    headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+  const response = await fetch("/api/assess", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
   const data = await response.json();
-  $("status").textContent = "";
+  button.disabled = false;
 
   if (!response.ok) {
-    fail(typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail));
+    RESULT = null;
+    LAYER = 1;
+    render();
+    $("pane").insertAdjacentHTML("afterbegin",
+      `<div id="err"><b>The framework rejected these inputs.</b><br>${
+        esc(typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail))}</div>`);
+    $("run-msg").innerHTML = `<b style="color:var(--red)">Not run. See the message above.</b>`;
     return;
   }
-  render(data);
-}
 
-function fail(message) {
-  $("error").textContent = message;
-  $("error").classList.remove("hidden");
-  $("status").textContent = "";
-  $("error").scrollIntoView({ behavior: "smooth", block: "center" });
-}
-
-/* ---------- display what came back ---------- */
-
-function render(r) {
-  const style = { "ON-SITE EXPERT": "onsite", "REMOTE SPECIALIST": "remote",
-    "SELF-ASSESSMENT": "self", "READINESS IMPROVEMENT / HOLD": "hold" }[r.selected_mode] || "hold";
-  const hold = r.selected_mode.startsWith("READINESS");
-  const span = a => !a ? "not reported"
-    : (Math.abs(a[0] - a[1]) < 1e-9 ? Math.abs(a[0]).toFixed(2)
-       : `${a[0].toFixed(2)} \u2013 ${a[1].toFixed(2)}`);
-
-  const readinessBars = Object.entries(r.readiness_vector).map(([key, value]) => `
-    <div class="bars"><div>${esc(key.replace(/_/g, " "))}</div>
-      <div class="bar"><i class="lS" style="width:${value}%"></i></div>
-      <div class="lv">${value.toFixed(1)}</div></div>`).join("");
-
-  const hazardBars = Object.entries(r.hazard_vector).map(([key, code]) => `
-    <div class="bars"><div>${esc(key.replace(/_/g, " "))}</div>
-      <div class="bar"><i class="l${code}" style="width:${code / 3 * 100}%"></i></div>
-      <div class="lv">${LEVELS[code]}</div></div>`).join("");
-
-  $("results").innerHTML = `
-    <div class="banner ${style}">
-      <div class="l">${hold ? "Phase 1 disposition" : "Phase 2 assessment mode"}</div>
-      <div class="m">${esc(r.selected_mode)}</div>
-      <div>${esc(r.rationale)}</div>
-    </div>
-
-    <div class="stats">
-      <div class="stat"><div class="k">Gate G</div>
-        <div class="v" style="color:${r.readiness_gate ? "var(--green)" : "var(--red)"}">
-          ${r.readiness_gate ? 1 : 0}</div></div>
-      <div class="stat"><div class="k">CRIS</div><div class="v">${r.cris} / 18</div></div>
-      <div class="stat"><div class="k">Interaction R</div>
-        <div class="v">${r.normalized_interaction.toFixed(2)}</div></div>
-      <div class="stat"><div class="k">Readiness RI</div>
-        <div class="v" style="font-size:15px">${span(r.readiness_interval)}</div></div>
-      <div class="stat"><div class="k">Opportunity OP</div>
-        <div class="v" style="font-size:15px">${span(r.opportunity_interval)}</div></div>
-      <div class="stat"><div class="k">Criticality AC</div>
-        <div class="v" style="font-size:15px">
-          ${span(r.assessment_criticality_interval)}</div></div>
-    </div>
-
-    <section><h2>Readiness vector<small>Equation (4), from the evidence you scored</small></h2>
-      <div class="body">${readinessBars}</div></section>
-
-    <section><h2>Hazard-interaction vector<small>retained in full; CRIS never replaces it</small></h2>
-      <div class="body">${hazardBars}</div></section>
-
-    <section><h2>Next actions</h2><div class="body">
-      <ul style="margin:0;padding-left:20px">
-        ${r.next_actions.map(a => `<li>${esc(a)}</li>`).join("") || "<li>None recorded.</li>"}
-      </ul></div></section>
-
-    <section><h2>Assessment record<small>${esc(r.assessment_id)} &middot;
-      ${esc(r.timestamp_utc)}</small></h2>
-      <div class="body"><pre>${esc(JSON.stringify(r, null, 2))}</pre></div></section>`;
-
-  $("results").scrollIntoView({ behavior: "smooth", block: "start" });
+  RESULT = data;
+  await loadRuns();
+  COMPARE.data = null;
+  LAYER = 2;
+  TAB = 0;
+  $("run-msg").innerHTML =
+    `Run <b>${esc(data.run_id)}</b> recorded. Layers 2 to 4 show the result.`;
+  render();
 }
 
 $("run").onclick = run;
-$("clear").onclick = () => location.reload();
+boot();
 </script>
 </body>
 </html>

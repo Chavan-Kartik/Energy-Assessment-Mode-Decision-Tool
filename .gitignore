@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+
+# Local run history, rebuilt automatically on first run
+assessment_records.db
+
+# Working notes and manuscript build tooling (kept locally, not published)
+START_HERE.md
+PAPER_GUIDE.md
+CASE_STUDIES.md
+APPENDIX_E.md
+build_appendix_e.py
+verify_appendix.py
+export_pdf.ps1
+capture_figures.ps1
+preview/
+
+# Manuscript drafts (the published copy lives in paper/)
+/*.docx
+/*.pdf
+~$*
+README_old_notes.md

@@ -1,329 +1,259 @@
-# Risk-Informed, Readiness-Aware Energy Assessment — working demonstrator
+# Risk-Informed, Readiness-Aware Energy Assessment for Upstream Oil and Gas
 
-A small web front end for `assessment_framework.py`, the reference implementation of
-Algorithm 1 from the manuscript *"A Risk-Informed, Readiness-Aware Framework for Energy
-Assessment Prioritization in Upstream Oil and Gas Operations."*
+A working decision-support prototype for the research paper *Risk-Informed, Readiness-Aware
+Energy Assessment in Upstream Oil and Gas Operations: A Robust Decision Framework and
+Explainable Digital Tool Architecture*.
 
-The framework file is used exactly as it was supplied. Not a line of it has been changed.
-Everything else in this folder exists only to get values into it and results out of it.
+The tool answers three questions before any energy-efficiency measure is assessed:
 
-**There are no stored results, no sample outputs, no shortcuts, and no calculations in the
-browser.** Every number on the screen is produced by `run_assessment_algorithm()` at the
-moment you press **Run assessment**. If you change one radio button and press it again, the
-answer is recomputed from scratch.
+1. **Is the evidence good enough** to assess this measure at all?
+2. **How deep** does the assessment need to go?
+3. **Who should do it:** the site's own team, a remote specialist, or an expert on site?
+
+Every result is computed live by the paper's Python reference implementation. Nothing is
+stored in advance, and nothing is calculated in the browser.
 
 ---
 
-## How to run it
+## Demo video
 
-You need Python 3.10 or newer.
+[![Watch the demo video](demo/poster.jpg)](demo/energy-assessment-demo.mp4)
 
-**Option 1 — double-click `run.bat`.** It installs the four dependencies and opens the
-browser for you.
+**[Watch the demo (8 min, MP4)](demo/energy-assessment-demo.mp4)**. A one-minute summary of
+the research, then the three case studies running live in the tool.
 
-**Option 2 — from a terminal:**
+| Time | Section |
+|---|---|
+| 0:00 | Summary of the research |
+| 0:55 | The tool |
+| 1:28 | Case study 1: the readiness check |
+| 3:16 | Case study 2: who should assess |
+| 5:00 | Case study 3: the safety override |
+| 7:06 | Audit trail, verification and adoption |
+
+## The paper
+
+[`paper/Risk_Informed_Energy_Assessment_Upstream_Oil_Gas_with_Appendix_E.docx`](paper/Risk_Informed_Energy_Assessment_Upstream_Oil_Gas_with_Appendix_E.docx)
+
+Appendix E of the paper documents this tool and presents the three case studies below, with
+the six figures in [`figures/`](figures).
+
+---
+
+## The research in brief
+
+Energy-saving changes in upstream oil and gas, such as re-loading a generator, controlling a
+compressor or recovering heat, can also affect safety-critical equipment. The framework
+keeps four judgements separate so that none of them can hide another:
+
+| | What it covers |
+|---|---|
+| **65 measures** | A traceable library of energy-efficiency measures across drilling, well-fluid extraction and surface treatment |
+| **6 hazard interactions** | Each measure is profiled against well control, fire and explosion, electrical, toxic exposure, mechanical failure and environmental impact. The summary score (CRIS) is a screening indicator, not a risk estimate |
+| **5 readiness dimensions** | A site's readiness is judged from its own evidence and reported as a range, rather than a single number built on assumed weights |
+| **Opportunity vs criticality** | How attractive a measure is stays separate from how demanding it is to assess, so a strong business case can never make up for missing evidence |
+
+Every decision then follows two steps:
 
 ```
-cd energy-assessment-tool
-py -m pip install -r requirements.txt
-py -m uvicorn app:app --reload
+Step 1  Readiness check        Is every mandatory prerequisite in place?
+                               No  -> READINESS IMPROVEMENT / HOLD (the missing item is named)
+                               Yes -> Step 2
+
+Step 2  Choose the assessor    Rules tested in order, first match decides:
+                               1. Safety or field-verification need     -> ON-SITE EXPERT
+                               2. Validated data, needs a specialist    -> REMOTE SPECIALIST
+                               3. Capable in-house team                 -> SELF-ASSESSMENT
+                               4. Anything unresolved escalates
+```
+
+No score can override the readiness check or the safety rule.
+
+---
+
+## The prototype
+
+The interface follows the four-layer architecture specified in the paper:
+
+| Layer | Purpose | What it shows |
+|---|---|---|
+| **L1** Input and evidence | Collect the facts | Measure library, readiness checklist, hazard ratings, judgement inputs, verification conditions |
+| **L2** Analytics and robustness | Compute the scores | Readiness vector and interval, hazard profile and CRIS, opportunity and criticality |
+| **L3** Decision and governance | Make the call | Readiness check item by item, the ordered rule sequence, the outcome and its reasoning |
+| **L4** Output and learning | Keep the record | Assessment record, action register, run comparison, reproduction of published results |
+
+A status column on the right shows the readiness check, readiness scores, hazard profile and
+outcome on every screen.
+
+---
+
+## Three case studies
+
+All three are verification cases from the paper. Between them they cover all four possible
+outcomes. Each one stores **input values only**, and loading it and pressing **Run
+assessment** produces the result.
+
+### 1. Can we even study this yet?
+
+A gas gathering station looks ready: meters listed, fuel bills filed, a competent engineer on
+site, and an approved scope. But the access permit covers the station boundary, not the
+compressor deck. Readiness still reads 65.63 to 71.88, and the outcome is
+**READINESS IMPROVEMENT / HOLD**. Opportunity and criticality are computed, then struck
+through, because they were never consulted. Authorize deck access, run again, and the check
+passes.
+
+*In practice:* a hold is a named to-do list, not an expensive and inconclusive site visit.
+
+| Input evidence | Outcome |
+|---|---|
+| ![Failed evidence item](figures/fig-e1-evidence-gate-item.png) | ![Hold](figures/fig-e2-hold-disposition.png) |
+
+### 2. Who should do the study?
+
+A drilling-support utility group wants to lower compressed-air dryer pressure (measure 16, a
+low hazard-interaction measure). With validated data and an engineer who can interpret it,
+the outcome is **SELF-ASSESSMENT**. Change exactly one condition, so that specialist
+interpretation is required, and it becomes **REMOTE SPECIALIST**. The run comparison shows the
+single input that changed the route.
+
+*In practice:* specialist time goes only where it is needed, and is delivered remotely from
+validated data.
+
+| First run | Two runs compared |
+|---|---|
+| ![Self-assessment](figures/fig-e3-self-assessment.png) | ![Comparison](figures/fig-e4-run-comparison.png) |
+
+### 3. Why can't a strong business case avoid the trip?
+
+Rod-packing maintenance and leak reduction on a reciprocating compressor (measure 54) cuts
+fuel, recovers product and reduces emissions. The site passes every readiness check. The tool
+reproduces every published value for this measure, but leak rate, packing condition and
+vibration can only be measured at the machine, so the override applies before any score is
+reached and the outcome is **ON-SITE EXPERT**.
+
+*In practice:* a high hazard profile shapes the verification plan. It does not cancel the
+project.
+
+| Analytics | Outcome |
+|---|---|
+| ![Analytics](figures/fig-e5-analytics-eem54.png) | ![On-site expert](figures/fig-e6-override-decision.png) |
+
+---
+
+## Quick start
+
+Requires **Python 3.10 or newer**.
+
+**Windows:** double-click `run.bat`. It installs the dependencies, starts the server and
+opens the browser.
+
+**Any platform:**
+
+```bash
+pip install -r requirements.txt
+python -m uvicorn app:app --reload
 ```
 
 Then open <http://127.0.0.1:8000>.
 
-**Option 3 — in VS Code:** open this folder and press **F5**.
+**VS Code:** open the folder and press **F5**.
 
-To stop it, press `Ctrl+C` in the terminal.
+To try a case study: **L1, Scope, choose a case, Load inputs, Run assessment**.
+
+### Check it against the paper
+
+```bash
+python verify.py
+```
+
+No server needed. It recomputes every value the paper reports, runs all case studies through
+the web layer, and tries to break the non-compensatory rules. Expected output:
+
+```
+43 of 43 checks passed.
+```
 
 ---
 
-## What each file does, and why
+## Results reproduced
 
-| File | What it does | Why it is here |
+| Published result | Paper | Tool |
 |---|---|---|
-| `assessment_framework.py` | The code shared by sir. Contains the whole method: readiness, the gate, CRIS, the score envelopes, and the mode decision. | This is the actual subject of the demonstration. It is imported unmodified so that anyone can diff it against the original and confirm nothing was touched. |
-| `app.py` | A ~150-line web server. Receives the form values, converts them into the dataclasses the framework expects, calls `run_assessment_algorithm()`, and returns its output as JSON. | The framework is a library with no interface. Something has to carry values between a browser and a Python function. This file does only that: it contains no formula, no threshold, and no decision rule. |
-| `index.html` | The whole user interface — one page, with its CSS and JavaScript inline. Draws the input form and displays whatever the server sends back. | Keeps the front end to a single readable file with no build step, no npm, and no framework to install. The JavaScript reads form fields and formats results; it performs no arithmetic that belongs to the method. |
-| `verify.py` | Checks the tool against every figure the manuscript states, then runs the same case through the web layer. `py verify.py`, no server needed. | Answers "is this actually right?" with evidence rather than assertion. Currently **20 of 20 checks pass**. See the section below. |
-| `DEMO.md` | Eight cases to run in front of an audience, in order, with the exact clicks and the exact figures each one produces. | Every result in it was generated by running the tool, so the walkthrough can be followed live without rehearsing. |
-| `eem_library.json` | The 65 energy-efficiency measures from Appendix A with their Appendix B hazard ratings. | Only used to *pre-fill* the six hazard dropdowns when you pick a measure, so you do not have to retype the published coding. Every one of those six values stays editable, and CRIS is always recomputed from whatever is on screen — never read from this file. |
-| `requirements.txt` | `numpy`, `scipy`, `fastapi`, `uvicorn`. | `numpy` and `scipy` are required by the framework itself (`scipy.optimize.linprog` solves the envelopes). `fastapi` and `uvicorn` serve the page. |
-| `run.bat` | Installs dependencies and starts the server. | Convenience for a Windows demo. |
-| `.vscode/launch.json` | F5 configuration. | Convenience for running it inside VS Code. |
+| Readiness S = (80, 70, 75, 60, 65), equal weights | 70.0 | 70.00 |
+| Same, weights bounded 0.10 to 0.35 | 66.25 to 73.75 | 66.25 to 73.75 |
+| Measure 54: CRIS, R | 14, 77.78 | 14, 77.78 |
+| Measure 54: opportunity priority | 75.0 | 75.00 |
+| Measure 54: assessment criticality | 70.69 | 70.69 |
+| Measure 54 with direct verification required | ON-SITE EXPERT | ON-SITE EXPERT |
+| Low-interaction case: R, criticality | 33.33, 22.08 | 33.33, 22.08 |
+| Validated evidence and specialist interpretation | REMOTE SPECIALIST | REMOTE SPECIALIST |
+| Failed readiness check | HOLD | HOLD |
+| CRIS values recomputed from the hazard coding that disagree | 0 of 65 | 0 of 65 |
+| Mean CRIS: drilling, extraction, surface treatment | 8.84, 10.00, 11.19 | 8.84, 10.00, 11.19 |
 
 ---
 
-## How input becomes output
+## Repository layout
 
-```
-index.html                app.py                     assessment_framework.py
------------               ------                     -----------------------
-form values   ──POST──▶   reshape into                run_assessment_algorithm()
-                          EvidenceItem /              ├─ compute_readiness_vector    Eq. (4)
-                          PreferenceSet               ├─ compute_readiness_gate      Eq. (7)
-                          dataclasses                 ├─ linear_score_envelope   Eq. (5)–(6)
-                                                      ├─ compute_cris            Eq. (1)–(3)
-                                                      ├─ compute_opportunity_envelope Eq.(8)
-                                                      ├─ compute_assessment_criticality
-                                                      │                          Eq. (9)–(10)
-                                                      └─ select_assessment_mode  Algorithm 1
-displayed     ◀──JSON──   returned unchanged   ◀───   AssessmentRecord
-```
+| File | Role |
+|---|---|
+| `assessment_framework.py` | The paper's reference implementation of the full method. Used unmodified. |
+| `app.py` | FastAPI web layer. Turns form values into the framework's inputs and returns its record unchanged. Contains no formulas or decision rules. |
+| `index.html` | The whole interface in one file, with no build step. |
+| `checklist.py` | Readiness evidence items, hazard domains, verification conditions and rule descriptions. |
+| `cases.py` | The three case studies, stored as inputs only. |
+| `storage.py` | Append-only SQLite record store with run IDs and SHA-256 digests of inputs and framework code. |
+| `reproduction.py` | Compares framework output with every value the paper states. Shared by the UI and `verify.py`. |
+| `verify.py` | The 43-check verification script. |
+| `capture_figures.py` | Regenerates the six figures in `figures/` with a headless browser. |
+| `eem_library.json` | The 65 measures and their hazard coding, used to pre-fill ratings. |
+| `demo/` | Demo video and thumbnail. |
+| `paper/` | The manuscript, including Appendix E. |
+| `figures/` | The six figures used in Appendix E. |
 
-The `AssessmentRecord` is shown on screen in full, in raw form, at the bottom of the
-results. That panel is the framework's own return value serialised directly — it is the
-proof that the display is not embellishing anything.
-
----
-
-## Is this valid against the manuscript?
-
-Run `py verify.py` to see the answer regenerate itself. Summary:
-
-### Reproduced exactly
-
-Every quantitative claim the manuscript makes in Sections 5.1 and 5.2 comes back out of this
-tool to the stated decimal place:
-
-| Manuscript claim | Stated | Produced |
-|---|---|---|
-| S = (80, 70, 75, 60, 65), equal weights → RI | 70.0 | 70.00 |
-| Same, bounded 0.10 ≤ w ≤ 0.35 → RI interval | [66.25, 73.75] | [66.25, 73.75] |
-| EEM 54 hazard vector (Appendix B) | (1, 3, 1, 3, 3, 3) | matches |
-| EEM 54 CRIS, R | 14, 77.78 | 14, 77.78 |
-| EEM 54 OP | 75.0 | 75.00 |
-| EEM 54 AC | 70.69 | 70.69 |
-| EEM 54 mode with direct verification required | ON-SITE EXPERT | ON-SITE EXPERT |
-| Low-interaction case: CRIS 6, D 90, C 25, V 20 → R, AC | 33.33, 22.08 | 33.33, 22.08 |
-| Gate failure → disposition | READINESS IMPROVEMENT / HOLD | matches |
-
-The last block of `verify.py` also pushes the Section 5.1 case through `app.py`'s own request
-handler, which shows the web layer neither distorts the inputs nor decorates the outputs.
-
-### One thing the manuscript does not pin down
-
-The paper reports **AC = 70.69 for EEM 54 but never states the D, C and V it used**. Any
-inputs satisfying `(100 − D) + C + V = 205` reproduce it — `verify.py` uses D = 40, C = 85,
-V = 60, but D = 45/C = 80/V = 70 works equally well. This is a gap in the manuscript's
-reporting, not in the code, and it is worth raising: for the result to be independently
-reproducible those three numbers need to be stated.
-
-### Judgement calls this tool makes that the manuscript leaves open
-
-These are places where a working tool has to decide something the paper deliberately leaves
-to the assessment team. They are choices, not derivations, and each is visible in the UI:
-
-1. **Acceptance thresholds τ.** Section 4.5 says each mandatory item is assigned a criterion
-   τ but never gives values. The tool defaults every gate item to τ ≥ 2 and lets you change
-   it to τ ≥ 1 per item. Nothing about that default comes from the paper.
-2. **Which items are mandatory.** Section 4.5 requires the operator to define the critical
-   set C for their own scope. The tool pre-marks the four items the paper offers as examples
-   — safe access authorization, a definable assessment boundary, minimum process/energy data,
-   required engineering competence — and every checkbox is editable.
-3. **The checklist itself.** The 38 evidence rows are transcribed from Appendix C Table C1's
-   "evidence to verify" column. Table C1 is a description of what to look for, not a fixed
-   instrument, so rows can be renamed, deleted and added.
-4. **D, C and V.** The paper defines their meaning and 0–100 range but gives no scoring
-   rubric. They are entered as expert judgement.
-5. **Weight bounds.** The 0.10–0.35 readiness band is the one the paper uses in its worked
-   example. The 0.15–0.40 criticality band is not from the paper; it is offered so you can
-   see the envelope respond.
-
-### Known limits, inherited from the reference implementation
-
-- **`not assessed` cannot be represented.** Section 6.5 states that a research-grade tool
-  must distinguish *not assessed*, *not applicable* and *zero interaction*, because
-  conflating them changes the meaning of the dataset. The readiness checklist does this
-  correctly (`None` versus `0`), but `validate_hazard_vector` accepts only 0–3, so an
-  unassessed hazard domain is indistinguishable from one rated 0. This is a limitation of
-  `assessment_framework.py`, and fixing it would mean changing that file.
-- **Nothing is stored.** Appendix D specifies an immutable, versioned assessment snapshot
-  with provenance links and an exportable audit trail. Each run produces a complete
-  `AssessmentRecord` with an ID and UTC timestamp, but this demonstrator only displays it —
-  there is no database, and closing the page discards it.
-- **No provenance fields.** `EvidenceItem` has an `evidence_reference` field for the
-  evidence URI that Appendix D asks for. The form does not collect it.
-- **Rank stability is not exposed.** `pairwise_rank_stability` (Equations 11–12) works, but
-  comparing two measures needs a second input form, so the UI does not reach it.
-- **No calibration.** The manuscript is explicit that its scenarios are deterministic
-  demonstrations of the logic, not field observations, and that no operator case dataset is
-  reported. Nothing here is validated against real facility outcomes, and no threshold in it
-  has been calibrated.
-
-### What this means in practice
-
-The mathematics and the decision logic are faithfully implemented and verified. What has not
-been established — by this tool or by the paper — is whether the framework produces *better
-assessment decisions* in the field. Section 6.5 says exactly that: implementation
-demonstrates executable utility, while external evaluation through software verification,
-usability testing and field decision-validity studies is what would establish value.
+`assessment_records.db` is created on first run and holds the run history. Delete it to start
+fresh.
 
 ---
 
-## The Python code sir shared, explained
-
-`assessment_framework.py` is about 750 lines. It is organised as: a few dataclasses that
-define the vocabulary, then one function per equation in the paper, then a wrapper that
-runs them in the order given by Algorithm 1.
-
-### The vocabulary (the dataclasses)
-
-**`EvidenceItem`** — one line on a readiness checklist. It has a `name`, a `score` of
-`0` (absent), `1` (partial), `2` (demonstrated) or `None` (not applicable), and two fields
-that make it a gate item: `mandatory` and `threshold`. This single class is what allows the
-same checklist to feed both the graded score and the pass/fail gate.
-
-**`PreferenceSet`** — a *set* of admissible weightings rather than one weighting. It holds a
-`lower` and `upper` bound per criterion, plus optional extra linear constraints (`A_ub`,
-`b_ub`, `A_eq`, `b_eq`). This is the mechanism behind the paper's central claim: instead of
-inventing precise weights that nobody can defend, you declare a range you *can* defend and
-the method reports what follows from all of it.
-
-**`EnvelopeResult`** — the answer that comes back from a weight set: a `minimum`, a
-`maximum`, and the two weight vectors that achieved them.
-
-**`DecisionInputs`** — the seven booleans and the reviewer note that drive the mode choice.
-
-**`AssessmentRecord`** — everything the run produced, stamped with an ID and a UTC
-timestamp. This is Appendix D's audit record.
-
-### Equation (4) — `compute_readiness_vector`
-
-For each of the five readiness dimensions:
+## How it works
 
 ```
-S_i = 100 × (sum of the item scores) / (2 × number of applicable items)
+index.html  --POST-->  app.py  -->  assessment_framework.run_assessment_algorithm()
+                                      readiness vector and readiness check
+                                      readiness interval (linear programming)
+                                      hazard profile and CRIS
+                                      opportunity and criticality envelopes
+                                      ordered mode rules
+                         |
+                     storage.py  -->  append-only record, run ID, input digest
+                         |
+index.html  <--JSON--  record returned unchanged
 ```
 
-Two details matter. Items scored `None` are dropped from the denominator, so marking
-something *not applicable* does not quietly penalise the facility. And if a whole dimension
-is `None`, the function raises rather than returning a number — a dimension with no evidence
-at all is a scoping problem, not a score of zero. (You can see this in the tool: set every
-item in one dimension to N/A and it refuses to run, with that message.)
-
-### Equation (7) — `compute_readiness_gate`
-
-Walks every evidence item, ignores the ones that are not `mandatory`, and fails the gate if
-any remaining item's score is below its own `threshold`. It returns `G` **and the list of
-items that failed**, so the record says *why*.
-
-This is the non-compensatory part of the method, and it is worth demonstrating deliberately.
-Take a well-scored facility and drop *"Safe access authorization"* alone from `2` to `1`:
-readiness barely moves — in `verify.py` it goes from 73.75 to 71.88 — and the tool switches
-from **ON-SITE EXPERT** to **READINESS IMPROVEMENT / HOLD**. A high average cannot buy its
-way past a missing authorisation. That is why the gate is a separate function rather than
-another weighted term.
-
-### Equations (5)–(6), (8), (10) — `linear_score_envelope`
-
-The one piece of real numerical machinery. Given a vector of values and a `PreferenceSet`,
-it finds the smallest and largest weighted score obtainable from *any* admissible weighting.
-
-Because the score `w·v` is linear in `w`, both extremes are linear programs, so it calls
-`scipy.optimize.linprog` twice: once minimising `w·v`, once minimising `−w·v` (which
-maximises it), both subject to the declared bounds plus a sum-to-one constraint that is
-always imposed. The results are exact, not sampled.
-
-Interpretation: **a narrow interval means the conclusion is robust** — the weights barely
-matter. A wide one means the answer depends on a judgement call that should be made
-explicitly. You can watch this happen: switch the readiness weight set between *equal
-weights* and *bounded 0.10–0.35*. Equal weights collapse the interval to a single number;
-the bounded set opens it up, and the width tells you how much the ranking really rests on
-weighting choices.
-
-### Equations (1)–(3) — `compute_cris`
-
-`CRIS` is simply the sum of the six hazard-interaction ratings, so it runs from 0 to 18, and
-`R = 100 × CRIS / 18` rescales it to 0–100 for use in criticality.
-
-The important thing is what the code does *not* do: `hazard_vector_dict` keeps all six
-ratings in the record alongside the total. CRIS is a screening index for breadth of
-interaction, and a single number cannot tell you whether an 8 came from one severe well-control
-interaction or from several mild ones. The paper is explicit that CRIS must never be read as
-a risk score or substitute for the vector, and the code enforces this by carrying both.
-
-### Equations (9)–(10) — `compute_assessment_criticality_envelope`
-
-Builds four components and hands them to the envelope solver:
-
-```
-R,   (100 − D),   C,   V
-```
-
-Note the second one. `D` is data *sufficiency*, so it enters as a **deficit**: the less data
-you have, the more assessment rigour the situation demands. The other three — hazard
-interaction, action complexity, verification need — push criticality up directly.
-
-### Equations (11)–(12) — `pairwise_rank_stability`
-
-Answers whether measure A really outranks measure B. It takes the difference of the two
-score vectors and puts *that* through the same envelope solver. If the whole difference
-interval sits above zero, A beats B under every admissible weighting — a *necessary*
-preference, safe to act on. If the interval straddles zero, the ordering is an artefact of
-the weights you happened to choose, and the function says so in plain words.
-
-(This function is in the framework and fully working, but comparing two measures needs a
-second input form, so the demonstrator does not expose it. It is the obvious next thing to
-add.)
-
-### Algorithm 1, steps 6–9 — `select_assessment_mode`
-
-The decision logic, in strict order. Order is the whole point: each rule can only be reached
-if the ones above it did not fire.
-
-1. **Gate failed** → `READINESS IMPROVEMENT / HOLD`. This is not one of the three assessment
-   modes; it is a disposition that says the question of *how* to assess cannot sensibly be
-   asked yet.
-2. **Safety override, or direct field verification required** → `ON-SITE EXPERT`. Either one
-   alone is enough, and nothing below can overturn it.
-3. **Validated digital evidence and specialist interpretation required** → `REMOTE SPECIALIST`.
-4. **Internal capability adequate, evidence validated, protocol satisfied, no specialist
-   need** → `SELF-ASSESSMENT`.
-5. Otherwise escalate: to `ON-SITE EXPERT` if the unresolved evidence needs field work,
-   to `REMOTE SPECIALIST` if not.
-
-Every branch returns a written rationale and a list of next actions, and appends the
-reviewer's note verbatim if one was given. Nothing is silent.
-
-### `run_assessment_algorithm`
-
-The wrapper. Calls the above in Algorithm 1's order, assembles the `AssessmentRecord`, and
-stamps it with a UTC timestamp. This is the only function `app.py` calls.
-
-### `manuscript_example`
-
-A self-contained example at the bottom of the file that reproduces the worked case from the
-paper. Run `py assessment_framework.py` to print it. Useful as a sanity check that the
-framework behaves identically here to wherever it came from.
+Every run records its inputs, an input digest, the framework version and a digest of the code
+that produced it, so any decision can be reconstructed and compared rather than overwritten.
 
 ---
 
-## Things worth showing in a demo
+## Design choices and limitations
 
-All of these are live: set the inputs, press the button, read the result.
-
-- **Nothing is precomputed.** The form opens with every evidence item at `0`. The first run
-  therefore returns a failed gate and a hold — because that is genuinely what the input says.
-- **It reproduces the paper.** `py verify.py` regenerates every figure in Sections 5.1 and
-  5.2 and prints them next to the published values.
-- **The gate cannot be outvoted.** The *"Safe access authorization"* case described above.
-- **Neither can the safety override.** Score every item `2`, tick *safety override*, and the
-  result is `ON-SITE EXPERT` on perfect readiness.
-- **Weights are shown as a range, not invented.** Switch the readiness weight set and watch
-  the interval open and close.
-- **Not-applicable is handled properly.** Mark items N/A and the denominator shrinks; mark a
-  whole dimension N/A and it refuses to guess.
-- **Scoping is enforced.** All inputs are validated to 0–100 and the hazard ratings to 0–3;
-  out-of-range values are rejected with the framework's own message rather than being
-  silently clamped.
+- **Thresholds are tool defaults.** Each mandatory item defaults to a threshold of 2. The paper
+  requires thresholds but does not give values.
+- **Case-study inputs are illustrative.** Readiness scores were chosen so the tool reproduces
+  the paper's worked example. Facility names are marked illustrative.
+- **Not field-validated.** The framework is pre-calibration. Independent expert review and
+  multi-facility pilots are needed before any threshold is used as a rule.
+- **"Not assessed" cannot be represented for hazards.** The reference implementation accepts
+  only ratings 0 to 3.
+- **Rank stability between two measures** is implemented in the framework but not yet exposed
+  in the interface. Comparing two runs is supported.
 
 ---
 
 ## Scope
 
-This is a screening and assessment-planning aid. It supports decisions about *how much
-assessment rigour a measure warrants and who should perform it*. It is not a risk assessment
-and does not replace PHA, HAZOP, quantitative risk assessment, management of change, or
-operator engineering approval. The hazard ratings are interaction-potential judgements, not
-probabilities or consequences. The banner at the top of the page states this so that it
-cannot be lost when someone screenshots a result.
+This is a screening and assessment-planning aid. It is **not** a risk assessment and does not
+replace PHA, HAZOP, quantitative risk assessment, management of change or operator
+engineering approval. Hazard ratings describe interaction potential, not probabilities or
+consequences. The tool recommends and explains. It does not authorize process changes.

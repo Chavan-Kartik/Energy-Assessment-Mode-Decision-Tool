@@ -3,148 +3,169 @@ Checks this tool against every number the manuscript actually states.
 
 Run it with:  py verify.py
 
-It does two things. First it calls assessment_framework.py directly and compares
-against Section 5.1 and 5.2. Then it pushes the same case through app.py's own
-request handler, to show that the web layer changes nothing on the way in or out.
+Three things happen. First the framework is called directly and compared against
+Sections 5.1 and 5.2. Then each of the three case studies is pushed through the
+web layer in app.py, to show that nothing is changed on the way in or out and
+that each one reaches the disposition it is meant to demonstrate. Finally the
+non-compensatory behaviour is exercised: a gate item is dropped below threshold,
+an override is declared, and an entire readiness dimension is marked not
+applicable.
 
-No server needs to be running.
+No server needs to be running. Records are written to a scratch database so the
+tool's own run history is left alone.
 """
 
 from __future__ import annotations
 
-import json
+import tempfile
 from pathlib import Path
 
-import app
-import assessment_framework as af
+import storage
+
+# Point the record store at a scratch file before app.py is used, so verifying
+# the tool does not add rows to the run list shown in the interface.
+storage.DB_PATH = Path(tempfile.gettempdir()) / "eaf_verify.db"
+storage.DB_PATH.unlink(missing_ok=True)
+storage.initialise()
+
+import app  # noqa: E402
+import cases  # noqa: E402
+import reproduction  # noqa: E402
 
 PASS, FAIL = "PASS", "*** FAIL ***"
 results: list[bool] = []
 
 
 def check(label: str, got, expected, tol: float = 5e-3) -> None:
-    if isinstance(got, (int, float)) and isinstance(expected, (int, float)):
+    if isinstance(got, bool) or isinstance(expected, bool):
+        good = got == expected
+        shown = str(got)
+    elif isinstance(got, (int, float)) and isinstance(expected, (int, float)):
         good = abs(got - expected) <= tol
         shown = f"{got:.2f}"
     else:
         good = got == expected
         shown = str(got)
     results.append(good)
-    print(f"  {label:<46} {shown:<26} paper: {expected}   {PASS if good else FAIL}")
+    print(f"  {label:<48} {shown:<28} paper: {expected}   {PASS if good else FAIL}")
+
+
+def assess(case_id: str, run_key: str) -> dict:
+    """Runs one stored case study through the web layer."""
+    found = cases.find_run(case_id, run_key)
+    assert found is not None, f"no case-study run {case_id}/{run_key}"
+    _, run = found
+    return app.assess(app.AssessmentIn(**run["inputs"]))
 
 
 # ---------------------------------------------------------------------------
-print("\nSection 5.1  readiness aggregation, S = (80, 70, 75, 60, 65)")
+print("\nThe framework against the manuscript's stated values")
+print("(this is the same check the tool reports in layer 4)\n")
 
-S = [80, 70, 75, 60, 65]
-equal = af.PreferenceSet(lower=[0.2] * 5, upper=[0.2] * 5)
-bounded = af.PreferenceSet(lower=[0.10] * 5, upper=[0.35] * 5)
-
-check("equal weights, RI", af.linear_score_envelope(S, equal).minimum, 70.0)
-env = af.linear_score_envelope(S, bounded)
-check("bounded 0.10-0.35, RI minimum", env.minimum, 66.25)
-check("bounded 0.10-0.35, RI maximum", env.maximum, 73.75)
-
-# ---------------------------------------------------------------------------
-print("\nSection 5.2  EEM 54, rod packing maintenance and leak reduction")
-
-library = json.loads(Path("eem_library.json").read_text(encoding="utf-8"))
-eem54 = next(e for e in library if e["eem_id"] == 54)
-cris, R = af.compute_cris(eem54["hazard_list"])
-
-check("hazard vector from Appendix B", eem54["hazard_list"], [1, 3, 1, 3, 3, 3])
-check("CRIS", cris, 14)
-check("normalized interaction R", R, 77.78)
-
-quarters = af.PreferenceSet(lower=[0.25] * 4, upper=[0.25] * 4)
-check("opportunity OP, scores 75/75/75",
-      af.compute_opportunity_envelope([75, 75, 75], app.equal_weights(3)).minimum, 75.0)
-
-# The manuscript reports AC = 70.69 for EEM 54 but never states the D, C and V it
-# used. Any inputs with (100-D) + C + V = 205 give that figure; this is one set.
-check("criticality AC, D=40 C=85 V=60",
-      af.compute_assessment_criticality_envelope(R, 40, 85, 60, quarters).minimum, 70.69)
-
-print("\nSection 5.2  low-interaction case, CRIS = 6, D = 90, C = 25, V = 20")
-cris6, R6 = af.compute_cris([1, 1, 1, 1, 1, 1])
-check("CRIS", cris6, 6)
-check("normalized interaction R", R6, 33.33)
-check("criticality AC",
-      af.compute_assessment_criticality_envelope(R6, 90, 25, 20, quarters).minimum, 22.08)
+for row in reproduction.checks():
+    results.append(row["passed"])
+    print(
+        f"  [{row['section']:>10}]  {row['quantity']:<46} {str(row['got']):<22}"
+        f" paper: {row['expected']}   {PASS if row['passed'] else FAIL}"
+    )
 
 # ---------------------------------------------------------------------------
-print("\nSame case again, but pushed through the web layer in app.py")
+print("\nCase study 3, through the web layer  (Section 5.2, EEM 54)")
 
+result = assess("override", "onsite")
+record = result["record"]
 
-def evidence(applicable: int, points: int) -> list[dict]:
-    """`applicable` items scored 0/1/2 summing to `points`; the first is a gate item."""
-    scores, left = [], points
-    for _ in range(applicable):
-        scores.append(min(2, left))
-        left -= scores[-1]
-    assert left == 0, "target not reachable with this many items"
-    return [{"name": f"evidence item {i + 1}", "score": s,
-             "mandatory": i == 0, "threshold": 2} for i, s in enumerate(scores)]
+check(
+    "readiness vector S",
+    [round(v, 2) for v in record["readiness_vector"].values()],
+    [80.0, 70.0, 75.0, 60.0, 65.0],
+)
+check("readiness interval, lower", record["readiness_interval"][0], 66.25)
+check("readiness interval, upper", record["readiness_interval"][1], 73.75)
+check("CRIS", record["cris"], 14)
+check("normalized interaction R", record["normalized_interaction"], 77.78)
+check("opportunity OP, z = (80, 75, 70)", record["opportunity_interval"][0], 75.0)
+check("criticality AC, D = 55, C = 70, V = 90",
+      record["assessment_criticality_interval"][0], 70.69)
+check("disposition", record["selected_mode"], "ON-SITE EXPERT")
+check("override was applied", record["override_triggered"], True)
+check("a score decided the route", result["decision"]["scores_used_for_routing"], False)
 
+# ---------------------------------------------------------------------------
+print("\nCase study 2, through the web layer  (Section 5.2, lower-interaction case)")
 
-# item counts chosen so each S value in the manuscript example is exactly reachable
-counts = {"data_availability": (10, 16), "workforce_capability": (5, 7),
-          "management_commitment": (8, 12), "baseline_status": (5, 6),
-          "implementation_readiness": (10, 13)}
-readiness = {dim: evidence(n, p) for dim, (n, p) in counts.items()}
+self_run = assess("routing", "self")
+remote_run = assess("routing", "remote")
 
-request = app.AssessmentIn(
-    facility="Section 5.1 example", assessor="verify.py",
-    eem_label="EEM 54", readiness=readiness,
-    hazard_vector=eem54["hazard_list"],
-    data_sufficiency_D=40, action_complexity_C=85, verification_need_V=60,
-    opportunity_scores=[75, 75, 75],
-    readiness_weight_mode="bounded", criticality_weight_mode="equal",
-    flags={"direct_verification_required": True, "safety_override": False,
-           "digital_evidence_validated": True,
-           "specialist_interpretation_required": False,
-           "internal_capability_adequate": True,
-           "protocol_requirements_satisfied": True,
-           "unresolved_evidence_requires_field": False},
-    rationale="")
+check("CRIS", self_run["record"]["cris"], 6)
+check("normalized interaction R", self_run["record"]["normalized_interaction"], 33.33)
+check("criticality AC, D = 90, C = 25, V = 20",
+      self_run["record"]["assessment_criticality_interval"][0], 22.08)
+check("disposition, in-house capability", self_run["record"]["selected_mode"],
+      "SELF-ASSESSMENT")
+check("disposition, specialist interpretation needed",
+      remote_run["record"]["selected_mode"], "REMOTE SPECIALIST")
 
-record = app.assess(request)
-check("readiness vector", [round(v, 2) for v in record["readiness_vector"].values()],
-      [80.0, 70.0, 75.0, 60.0, 65.0])
-check("RI minimum", record["readiness_interval"][0], 66.25)
-check("RI maximum", record["readiness_interval"][1], 73.75)
-check("AC", record["assessment_criticality_interval"][0], 70.69)
-check("selected mode", record["selected_mode"], "ON-SITE EXPERT")
+comparison = app.compare(a=self_run["run_id"], b=remote_run["run_id"])
+check("differing inputs the routing rules read",
+      comparison["routing_differences"],
+      ["condition / specialist_interpretation_required"])
+check("readiness, hazard and criticality inputs are identical",
+      [d["field"] for d in comparison["differences"] if not d["affects_routing"]],
+      ["rationale"])
+
+# ---------------------------------------------------------------------------
+print("\nCase study 1, through the web layer  (Section 4.5, the readiness gate)")
+
+held = assess("gate", "held")
+cleared = assess("gate", "cleared")
+
+check("disposition with one mandatory item unmet", held["record"]["selected_mode"],
+      "READINESS IMPROVEMENT / HOLD")
+check("readiness was high anyway, upper bound",
+      held["record"]["readiness_interval"][1], 71.88, tol=0.01)
+check("gate G", held["record"]["readiness_gate"], False)
+check("disposition once the item is satisfied", cleared["record"]["selected_mode"],
+      "ON-SITE EXPERT")
+
+gate_comparison = app.compare(a=held["run_id"], b=cleared["run_id"])
+check("differing inputs the routing rules read",
+      gate_comparison["routing_differences"],
+      ["readiness / management_commitment / Safe access authorization"])
 
 # ---------------------------------------------------------------------------
 print("\nNon-compensatory behaviour  (Section 4.5, Table 5)")
 
-# same case, but one mandatory item drops from 2 to 1
-request.readiness["management_commitment"][0].score = 1
-held = app.assess(request)
-check("one mandatory item below threshold", held["selected_mode"],
-      "READINESS IMPROVEMENT / HOLD")
-check("readiness is still high anyway", held["readiness_interval"][1], 71.88, tol=0.01)
-
-# perfect readiness plus a safety override
-request.readiness["management_commitment"][0].score = 2
-request.flags["direct_verification_required"] = False
+# Perfect gate, but a declared safety override with no direct-verification need.
+found = cases.find_run("routing", "self")
+assert found is not None
+request = app.AssessmentIn(**found[1]["inputs"])
 request.flags["safety_override"] = True
 override = app.assess(request)
-check("safety override on passing gate", override["selected_mode"], "ON-SITE EXPERT")
+check("safety override on a passing gate", override["record"]["selected_mode"],
+      "ON-SITE EXPERT")
+check("the low criticality figure did not prevent it",
+      override["record"]["assessment_criticality_interval"][0], 22.08)
 
-# a whole dimension marked not applicable must be refused, not scored as zero
-detail = ""
+# Every rule above the one that applied must have been evaluated and not met.
+trace = override["decision"]["trace"]
+applied = next(row for row in trace if row["fired"])
+check("rule that applied", applied["id"], "override")
+check("rules above it, all not met",
+      all(row["status"] == "not met" for row in trace[: trace.index(applied)]), True)
+
+# A whole dimension marked not applicable must be refused, not scored as zero.
+request.readiness["baseline_status"] = [
+    app.EvidenceIn(name="not applicable at this facility", score=None) for _ in range(3)
+]
 try:
-    request.readiness["baseline_status"] = [
-        app.EvidenceIn(name="n/a", score=None) for _ in range(3)]
     app.assess(request)
-    outcome = "accepted silently"
-except Exception as error:                                   # noqa: BLE001
-    outcome = "refused"
-    detail = getattr(error, "detail", str(error))
-check("whole dimension not applicable", outcome, "refused")
-print(f"      framework said: {detail}")
+    outcome, detail = "accepted silently", ""
+except Exception as error:  # noqa: BLE001
+    outcome, detail = "refused", getattr(error, "detail", str(error))
+check("a readiness dimension with no applicable items", outcome, "refused")
+print(f"      the framework said: {detail}")
 
 # ---------------------------------------------------------------------------
+storage.DB_PATH.unlink(missing_ok=True)
 print(f"\n{sum(results)} of {len(results)} checks passed.\n")
