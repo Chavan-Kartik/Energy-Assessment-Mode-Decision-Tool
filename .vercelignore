@@ -1,0 +1,13 @@
+# Not needed to run the tool; keeps the deployment small
+demo/
+paper/
+figures/
+*.docx
+*.pdf
+*.md
+capture_figures.py
+verify.py
+run.bat
+.vscode/
+__pycache__/
+assessment_records.db

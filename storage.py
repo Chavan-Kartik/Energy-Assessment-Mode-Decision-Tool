@@ -14,12 +14,28 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import sqlite3
+import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator, Optional
 
-DB_PATH = Path(__file__).parent / "assessment_records.db"
+
+def _default_db_path() -> Path:
+    """
+    Beside the code when run locally. Serverless hosts such as Vercel only allow
+    writes to the temporary directory, so the store moves there; its history then
+    lasts only as long as the running instance. EAF_DB_PATH overrides both.
+    """
+    if os.environ.get("EAF_DB_PATH"):
+        return Path(os.environ["EAF_DB_PATH"])
+    if os.environ.get("VERCEL"):
+        return Path(tempfile.gettempdir()) / "assessment_records.db"
+    return Path(__file__).parent / "assessment_records.db"
+
+
+DB_PATH = _default_db_path()
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS runs (
