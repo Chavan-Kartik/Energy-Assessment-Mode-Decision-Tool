@@ -630,6 +630,47 @@
   .caserow .cr { display: flex; flex-direction: column; gap: 3px; align-items: flex-end; }
   .runpick { display: flex; align-items: center; gap: 6px; font-size: 10.5px; }
   .runpick .ex { font-family: var(--mono); font-size: 9.5px; color: var(--faint); }
+
+  /* ---- plain-language help for first-time users ------------------------
+     Hidden in capture mode so the Appendix E figures reproduce unchanged. */
+
+  .start {
+    border: 1px solid #b9ccd6; border-left: 4px solid var(--accent);
+    background: #f3f8fa; padding: 12px 14px; margin-bottom: 14px;
+  }
+  .start h3 { margin: 0 0 4px; font-size: 15px; color: var(--accent); }
+  .start p { margin: 0 0 8px; font-size: 12.5px; line-height: 1.5; }
+  .start ol { margin: 0 0 12px; padding-left: 20px; font-size: 12.5px; line-height: 1.65; }
+  .start .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+  .start button.act { font-size: 12.5px; padding: 7px 14px; }
+  .plain { margin-top: 6px; font-size: 12.5px; font-weight: 600; line-height: 1.45; }
+  .minidisp .plain { font-size: 11.5px; margin-top: 4px; }
+  body.capture .start, body.capture .plain { display: none !important; }
+
+  /* ---- phones and narrow windows -------------------------------------- */
+
+  @media (max-width: 960px) {
+    body { overflow: auto; font-size: 14px; }
+    #shell { height: auto; min-height: 100vh; grid-template-rows: auto; padding-bottom: 96px; }
+    #titlebar { flex-wrap: wrap; padding: 8px 12px; gap: 2px 12px; }
+    #titlebar h1, #titlebar .sub { white-space: normal; }
+    #notice { padding: 6px 12px; }
+    #body { grid-template-columns: 1fr; }
+    #rail { border-right: none; border-bottom: 1px solid var(--line); }
+    #rail .rail-head, #rail .foot, #layers .layer .d, #tabs .eq, #statusbar { display: none; }
+    #layers { display: grid; grid-template-columns: 1fr 1fr; }
+    #tabs { overflow-x: auto; min-height: 40px; }
+    #tabs .tab { font-size: 13px; }
+    #pane { overflow: visible; overflow-x: auto; }
+    .cols2, .cols3 { grid-template-columns: 1fr; }
+    #status { border-left: none; border-top: 1px solid var(--line); }
+    #status .scroll { overflow: visible; }
+    #status .runfoot {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, .15);
+    }
+    #status .runfoot button { font-size: 15px; padding: 10px; }
+  }
 </style>
 </head>
 <body>
@@ -718,6 +759,14 @@ const DISP_CLASS = {
   "SELF-ASSESSMENT": "self",
   "READINESS IMPROVEMENT / HOLD": "hold",
 };
+
+const PLAIN = {
+  "ON-SITE EXPERT": "What this means: send a qualified engineer to the site. Some of the evidence can only be measured at the equipment.",
+  "REMOTE SPECIALIST": "What this means: a specialist can review your validated data remotely. No site trip is needed.",
+  "SELF-ASSESSMENT": "What this means: your own team can carry out this study with the data it already has.",
+  "READINESS IMPROVEMENT / HOLD": "What this means: do not start the study yet. Fix the items marked \u2715, then run the assessment again.",
+};
+const plain = disposition => PLAIN[disposition] ? `<div class="plain">${esc(PLAIN[disposition])}</div>` : "";
 
 let BOOT = null;      // definitions from the server
 let RESULT = null;    // last server response
@@ -953,6 +1002,22 @@ function render() {
 function paneScope() {
   const m = BOOT.eems.find(e => e.eem_id === Number(form.eem_id));
   return `
+  ${RESULT ? "" : `<div class="start">
+    <h3>Start here</h3>
+    <p>Before an energy-saving study begins, this tool checks whether your site has enough
+      evidence to study the measure, and then says who should do the study: your own team,
+      a remote specialist, or an engineer on site. Every answer comes with its reasons.</p>
+    <ol>
+      <li>Enter your facility and choose the energy-saving measure below.</li>
+      <li>Score your evidence on the <b>Readiness evidence</b> tab. The safety ratings on
+        <b>Hazard interaction</b> are filled in for the chosen measure and can be edited.</li>
+      <li>Press <b>Run assessment</b>. The answer and the reasons for it open on the Decision page.</li>
+    </ol>
+    <div class="btns">
+      <button class="act" data-case="override" data-run="onsite" data-go="1">See an example: site ready, expert needed</button>
+      <button class="act ghost" data-case="gate" data-run="held" data-go="1">See an example: site not ready yet</button>
+    </div>
+  </div>`}
   <div class="cols2">
     <div>
       <div class="panel"><div class="ph"><b>Assessment scope</b>
@@ -1407,6 +1472,7 @@ function dispositionBlock() {
       : "Phase 2 assessment mode"}</div>
     <div class="m">${esc(d.disposition)}</div>
     <div class="r">${esc(d.rationale)}</div>
+    ${plain(d.disposition)}
   </div>`;
 }
 
@@ -1755,7 +1821,7 @@ function renderStatus() {
     <div class="sh">Disposition</div>
     ${d ? `<div class="minidisp disp-${DISP_CLASS[d.disposition] || "hold"}">
         <div class="l">${d.disposition.startsWith("READINESS") ? "Phase 1" : "Phase 2"}</div>
-        <div class="m">${esc(d.disposition)}</div></div>`
+        <div class="m">${esc(d.disposition)}</div>${plain(d.disposition)}</div>`
       : `<div class="pending">Not yet run.</div>`}
   </div>
 
@@ -1872,7 +1938,11 @@ function wire() {
     const t = event.target.closest("[data-act], [data-dim], [data-case], #dl, #refresh-runs, #do-compare");
     if (!t) return;
 
-    if (t.dataset.case) { await loadCase(t.dataset.case, t.dataset.run); return; }
+    if (t.dataset.case) {
+      await loadCase(t.dataset.case, t.dataset.run);
+      if (t.dataset.go) await run();
+      return;
+    }
     if (t.dataset.dim) { EVDIM = t.dataset.dim; render(); return; }
 
     if (t.id === "dl") {
@@ -2033,10 +2103,10 @@ async function run() {
   RESULT = data;
   await loadRuns();
   COMPARE.data = null;
-  LAYER = 2;
+  LAYER = 3;
   TAB = 0;
   $("run-msg").innerHTML =
-    `Run <b>${esc(data.run_id)}</b> recorded. Layers 2 to 4 show the result.`;
+    `Run <b>${esc(data.run_id)}</b> recorded. The decision is shown; layers 2 and 4 hold the detail.`;
   render();
 }
 
